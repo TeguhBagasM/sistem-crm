@@ -2,63 +2,87 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pelanggan;
+use App\Models\CalonPelanggan;
 use Illuminate\Http\Request;
 
 class PelangganController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $pelanggan = Pelanggan::with('pemilik')
+            ->latest()
+            ->paginate(15);
+
+        return view('pelanggan.index', compact('pelanggan'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $leads = CalonPelanggan::qualified()
+            ->whereDoesntHave('pelanggan')
+            ->get();
+
+        return view('pelanggan.create', compact('leads'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'id_calon_pelanggan' => 'nullable|exists:calon_pelanggan,id',
+            'nama' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'no_telepon' => 'required|string|max:20',
+            'perusahaan' => 'nullable|string|max:255',
+            'status_pelanggan' => 'required|in:aktif,tidak_aktif',
+        ]);
+
+        $validated['pemilik_data'] = auth()->id();
+
+        $pelanggan = Pelanggan::create($validated);
+
+        // Update status lead jika ada
+        if ($validated['id_calon_pelanggan']) {
+            CalonPelanggan::find($validated['id_calon_pelanggan'])
+                ->update(['status_lead' => 'dikonversi']);
+        }
+
+        return redirect()->route('pelanggan.index')
+            ->with('success', 'Pelanggan berhasil ditambahkan!');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(Pelanggan $pelanggan)
     {
-        //
+        $pelanggan->load(['pemilik', 'calonPelanggan', 'riwayatEmail', 'jadwalAktivitas']);
+        return view('pelanggan.show', compact('pelanggan'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(Pelanggan $pelanggan)
     {
-        //
+        return view('pelanggan.edit', compact('pelanggan'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Pelanggan $pelanggan)
     {
-        //
+        $validated = $request->validate([
+            'nama' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'no_telepon' => 'required|string|max:20',
+            'perusahaan' => 'nullable|string|max:255',
+            'status_pelanggan' => 'required|in:aktif,tidak_aktif',
+        ]);
+
+        $pelanggan->update($validated);
+
+        return redirect()->route('pelanggan.index')
+            ->with('success', 'Data pelanggan berhasil diperbarui!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Pelanggan $pelanggan)
     {
-        //
+        $pelanggan->delete();
+
+        return redirect()->route('pelanggan.index')
+            ->with('success', 'Pelanggan berhasil dihapus!');
     }
 }

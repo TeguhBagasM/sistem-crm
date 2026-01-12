@@ -2,63 +2,88 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CalonPelanggan;
 use Illuminate\Http\Request;
 
 class CalonPelangganController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $leads = CalonPelanggan::with('pembuatData')
+            ->latest()
+            ->paginate(15);
+
+        return view('leads.index', compact('leads'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('leads.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'nama' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'no_telepon' => 'required|string|max:20',
+            'sumber' => 'required|in:IG,Website,WA',
+            'catatan' => 'nullable|string',
+        ]);
+
+        $validated['dibuat_oleh'] = auth()->id();
+        $validated['status_lead'] = 'baru';
+
+        CalonPelanggan::create($validated);
+
+        return redirect()->route('leads.index')
+            ->with('success', 'Calon pelanggan berhasil ditambahkan!');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(CalonPelanggan $lead)
     {
-        //
+        $lead->load('pembuatData', 'pelanggan');
+        return view('leads.show', compact('lead'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(CalonPelanggan $lead)
     {
-        //
+        return view('leads.edit', compact('lead'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, CalonPelanggan $lead)
     {
-        //
+        $validated = $request->validate([
+            'nama' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'no_telepon' => 'required|string|max:20',
+            'sumber' => 'required|in:IG,Website,WA',
+            'status_lead' => 'required|in:baru,dihubungi,qualified,dikonversi,gagal',
+            'catatan' => 'nullable|string',
+        ]);
+
+        $lead->update($validated);
+
+        return redirect()->route('leads.index')
+            ->with('success', 'Data calon pelanggan berhasil diperbarui!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(CalonPelanggan $lead)
     {
-        //
+        $lead->delete();
+
+        return redirect()->route('leads.index')
+            ->with('success', 'Calon pelanggan berhasil dihapus!');
+    }
+
+    public function updateStatus(Request $request, CalonPelanggan $lead)
+    {
+        $validated = $request->validate([
+            'status_lead' => 'required|in:baru,dihubungi,qualified,dikonversi,gagal',
+        ]);
+
+        $lead->update($validated);
+
+        return back()->with('success', 'Status lead berhasil diperbarui!');
     }
 }
