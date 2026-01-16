@@ -37,7 +37,18 @@
                         <td>{{ $lead->email ?? '-' }}</td>
                         <td>{{ $lead->no_telepon }}</td>
                         <td><span class="badge bg-secondary">{{ $lead->sumber }}</span></td>
-                        <td><span class="badge {{ $lead->getStatusBadgeClass() }}">{{ $lead->status_lead }}</span></td>
+                        <td>
+                            <form action="{{ route('leads.update-status', $lead) }}" method="POST" class="d-inline status-form">
+                                @csrf
+                                @method('PATCH')
+                                <select class="form-select form-select-sm status-select" name="status_lead" data-lead-id="{{ $lead->id }}">
+                                    <option value="baru" {{ $lead->status_lead == 'baru' ? 'selected' : '' }}>Baru</option>
+                                    <option value="dihubungi" {{ $lead->status_lead == 'dihubungi' ? 'selected' : '' }}>Dihubungi</option>
+                                    <option value="qualified" {{ $lead->status_lead == 'qualified' ? 'selected' : '' }}>Qualified</option>
+                                    <option value="gagal" {{ $lead->status_lead == 'gagal' ? 'selected' : '' }}>Gagal</option>
+                                </select>
+                            </form>
+                        </td>
                         <td>{{ $lead->pembuatData->name }}</td>
                         <td>
                             <div class="btn-group btn-group-sm">
@@ -76,3 +87,55 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+// Auto-submit form when status select changes
+document.querySelectorAll('.status-select').forEach(select => {
+    select.addEventListener('change', function() {
+        const form = this.closest('.status-form');
+        
+        // Show loading state
+        const originalText = this.innerHTML;
+        this.disabled = true;
+        this.style.opacity = '0.5';
+        
+        // Submit form via AJAX
+        fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                // Show success message
+                const badge = this.closest('td');
+                const statusValue = this.value;
+                const statusText = this.options[this.selectedIndex].text;
+                
+                // Optional: Show toast/alert
+                console.log('Status berhasil diubah ke: ' + statusText);
+            } else {
+                throw new Error('Gagal mengubah status');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Gagal mengubah status. Silakan coba lagi.');
+            // Revert to previous selection
+            this.value = this.dataset.previousValue || '';
+        })
+        .finally(() => {
+            // Remove loading state
+            this.disabled = false;
+            this.style.opacity = '1';
+        });
+    });
+    
+    // Store initial value
+    select.dataset.previousValue = select.value;
+});
+</script>
+@endpush

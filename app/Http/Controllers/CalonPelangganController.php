@@ -58,7 +58,7 @@ class CalonPelangganController extends Controller
             'email' => 'nullable|email|max:255',
             'no_telepon' => 'required|string|max:20',
             'sumber' => 'required|in:IG,Website,WA',
-            'status_lead' => 'required|in:baru,dihubungi,qualified,dikonversi,gagal',
+            'status_lead' => 'required|in:baru,dihubungi,qualified,gagal',
             'catatan' => 'nullable|string',
         ]);
 
@@ -79,7 +79,7 @@ class CalonPelangganController extends Controller
     public function updateStatus(Request $request, CalonPelanggan $lead)
     {
         $validated = $request->validate([
-            'status_lead' => 'required|in:baru,dihubungi,qualified,dikonversi,gagal',
+            'status_lead' => 'required|in:baru,dihubungi,qualified,gagal',
         ]);
 
         $lead->update($validated);

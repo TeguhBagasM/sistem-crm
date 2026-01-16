@@ -26,7 +26,7 @@
 
                     <div class="mb-3">
                         <label for="id_pelanggan" class="form-label">
-                            Kepada (Pelanggan) <span class="text-danger">*</span>
+                            Pelanggan <span class="text-danger">*</span>
                         </label>
                         <select class="form-select @error('id_pelanggan') is-invalid @enderror"
                                 id="id_pelanggan" name="id_pelanggan" required>
@@ -34,8 +34,9 @@
                             @foreach($pelanggan as $customer)
                                 <option value="{{ $customer->id }}"
                                         data-email="{{ $customer->email }}"
+                                        data-nama="{{ $customer->nama }}"
                                         {{ old('id_pelanggan', $email->id_pelanggan) == $customer->id ? 'selected' : '' }}>
-                                    {{ $customer->nama }} - {{ $customer->email ?? 'No Email' }}
+                                    {{ $customer->nama }} {{ $customer->email ? '- ' . $customer->email : '(Tidak ada email)' }}
                                 </option>
                             @endforeach
                         </select>
@@ -57,18 +58,6 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="waktu_kirim" class="form-label">
-                            Waktu Kirim <span class="text-danger">*</span>
-                        </label>
-                        <input type="datetime-local" class="form-control @error('waktu_kirim') is-invalid @enderror"
-                               id="waktu_kirim" name="waktu_kirim"
-                               value="{{ old('waktu_kirim', $email->waktu_kirim->format('Y-m-d\TH:i')) }}" required>
-                        @error('waktu_kirim')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
                         <label for="isi_pesan" class="form-label">
                             Isi Email <span class="text-danger">*</span>
                         </label>
@@ -81,9 +70,24 @@
                         <small class="text-muted">Karakter: <span id="char-count">{{ strlen($email->isi_pesan) }}</span></small>
                     </div>
 
+                    <div class="mb-3">
+                        <label for="waktu_kirim" class="form-label">
+                            Waktu Pencatatan <span class="text-danger">*</span>
+                        </label>
+                        <input type="datetime-local" class="form-control @error('waktu_kirim') is-invalid @enderror"
+                               id="waktu_kirim" name="waktu_kirim"
+                               value="{{ old('waktu_kirim', $email->waktu_kirim->format('Y-m-d\TH:i')) }}" required>
+                        @error('waktu_kirim')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-save"></i> Update Email
+                        </button>
+                        <button type="button" class="btn btn-success" id="sendEmailBtn">
+                            <i class="bi bi-envelope"></i> Kirim Email
                         </button>
                         <a href="{{ route('emails.show', $email) }}" class="btn btn-secondary">
                             <i class="bi bi-x-circle"></i> Batal
@@ -99,7 +103,7 @@
             <div class="card-body">
                 <h6 class="card-title"><i class="bi bi-info-circle"></i> Informasi</h6>
                 <p class="small mb-2">
-                    <strong>Dibuat:</strong> {{ $email->created_at->format('d M Y H:i') }}
+                    <strong>Dicatat:</strong> {{ $email->created_at->format('d M Y H:i') }}
                 </p>
                 <p class="small mb-2">
                     <strong>Terakhir Update:</strong> {{ $email->updated_at->format('d M Y H:i') }}
@@ -115,8 +119,30 @@
 @push('scripts')
 <script>
 // Character counter
-document.getElementById('isi_pesan').addEventListener('input', function() {
-    document.getElementById('char-count').textContent = this.value.length;
+const isiPesan = document.getElementById('isi_pesan');
+const charCount = document.getElementById('char-count');
+isiPesan.addEventListener('input', function() {
+    charCount.textContent = this.value.length;
+});
+
+// Send Email Button
+const sendEmailBtn = document.getElementById('sendEmailBtn');
+const pelangganSelect = document.getElementById('id_pelanggan');
+const subjekInput = document.getElementById('subjek');
+
+sendEmailBtn.addEventListener('click', function() {
+    const selected = pelangganSelect.options[pelangganSelect.selectedIndex];
+    const toEmail = selected.dataset.email;
+    const subjek = subjekInput.value;
+    const isiPesanValue = isiPesan.value;
+
+    if (!toEmail || toEmail === 'null') {
+        alert('Pelanggan tidak memiliki email!');
+        return;
+    }
+
+    const mailtoLink = `mailto:${toEmail}?subject=${encodeURIComponent(subjek)}&body=${encodeURIComponent(isiPesanValue)}`;
+    window.location.href = mailtoLink;
 });
 </script>
 @endpush

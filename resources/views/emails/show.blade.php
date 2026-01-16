@@ -20,6 +20,11 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="bi bi-envelope"></i> {{ $email->subjek }}</h5>
                     <div>
+                        @if($email->pelanggan->email)
+                        <button class="btn btn-sm btn-success" onclick="kirimEmailLagi()">
+                            <i class="bi bi-send"></i> Kirim Lagi
+                        </button>
+                        @endif
                         <a href="{{ route('emails.edit', $email) }}" class="btn btn-sm btn-warning">
                             <i class="bi bi-pencil"></i> Edit
                         </a>
@@ -48,7 +53,7 @@
                             <p class="mb-2">
                                 <strong><i class="bi bi-person-check"></i> Kepada:</strong><br>
                                 <span class="text-primary">{{ $email->pelanggan->nama }}</span><br>
-                                <small class="text-muted">{{ $email->pelanggan->email }}</small>
+                                <small class="text-muted">{{ $email->pelanggan->email ?? 'Tidak ada email' }}</small>
                             </p>
                         </div>
                     </div>
@@ -86,12 +91,12 @@
                         <td><strong>Status</strong></td>
                         <td>
                             <span class="badge {{ $email->waktu_kirim->isToday() ? 'bg-success' : 'bg-secondary' }}">
-                                {{ $email->waktu_kirim->isToday() ? 'Baru Dikirim' : 'Terkirim' }}
+                                {{ $email->waktu_kirim->isToday() ? 'Baru Tercatat' : 'Tercatat' }}
                             </span>
                         </td>
                     </tr>
                     <tr>
-                        <td><strong>Dibuat</strong></td>
+                        <td><strong>Dicatat</strong></td>
                         <td>{{ $email->created_at->format('d M Y H:i') }}</td>
                     </tr>
                     <tr>
@@ -123,4 +128,22 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+function kirimEmailLagi() {
+    const toEmail = "{{ $email->pelanggan->email }}";
+    const subjek = "{{ $email->subjek }}";
+    const isiPesan = `{{ addslashes($email->isi_pesan) }}`;
+
+    if (!toEmail) {
+        alert('Pelanggan tidak memiliki email!');
+        return;
+    }
+
+    const mailtoLink = `mailto:${toEmail}?subject=${encodeURIComponent(subjek)}&body=${encodeURIComponent(isiPesan)}`;
+    window.location.href = mailtoLink;
+}
+</script>
+@endpush
 @endsection
