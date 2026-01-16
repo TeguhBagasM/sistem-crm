@@ -8,13 +8,53 @@ use Illuminate\Http\Request;
 
 class RiwayatEmailController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $emails = RiwayatEmail::with(['pelanggan', 'pengirim'])
-            ->latest('waktu_kirim')
-            ->paginate(15);
+        $query = RiwayatEmail::with(['pelanggan', 'pengirim']);
 
-        return view('emails.index', compact('emails'));
+        // Filter by search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('subjek', 'like', "%{$search}%")
+                  ->orWhere('isi_pesan', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by pelanggan
+        if ($request->filled('pelanggan_id')) {
+            $query->where('id_pelanggan', $request->pelanggan_id);
+        }
+
+        // Filter by tanggal
+        if ($request->filled('tanggal')) {
+            $query->whereDate('waktu_kirim', $request->tanggal);
+        }
+
+        $emails = $query->latest('waktu_kirim')->paginate(15);
+
+        // Statistics
+        $emailBulanIni = RiwayatEmail::whereMonth('waktu_kirim', now()->month)
+            ->whereYear('waktu_kirim', now()->year)
+            ->count();
+
+        $emailMingguIni = RiwayatEmail::whereBetween('waktu_kirim', [
+            now()->startOfWeek(),
+            now()->endOfWeek()
+        ])->count();
+
+        $emailHariIni = RiwayatEmail::whereDate('waktu_kirim', now()->toDateString())
+            ->count();
+
+        $pelangganList = Pelanggan::aktif()->orderBy('nama')->get();
+
+        return view('emails.index', compact(
+            'emails',
+            'emailBulanIni',
+            'emailMingguIni',
+            'emailHariIni',
+            'pelangganList'
+        ));
     }
 
     public function create()
