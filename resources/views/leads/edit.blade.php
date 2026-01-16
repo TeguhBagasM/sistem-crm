@@ -67,7 +67,6 @@
                             <option value="baru" {{ old('status_lead', $lead->status_lead) == 'baru' ? 'selected' : '' }}>Baru</option>
                             <option value="dihubungi" {{ old('status_lead', $lead->status_lead) == 'dihubungi' ? 'selected' : '' }}>Dihubungi</option>
                             <option value="qualified" {{ old('status_lead', $lead->status_lead) == 'qualified' ? 'selected' : '' }}>Qualified</option>
-                            <option value="dikonversi" {{ old('status_lead', $lead->status_lead) == 'dikonversi' ? 'selected' : '' }}>Dikonversi</option>
                             <option value="gagal" {{ old('status_lead', $lead->status_lead) == 'gagal' ? 'selected' : '' }}>Gagal</option>
                         </select>
                         @error('status_lead')

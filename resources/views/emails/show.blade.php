@@ -21,9 +21,13 @@
                     <h5 class="mb-0"><i class="bi bi-envelope"></i> {{ $email->subjek }}</h5>
                     <div>
                         @if($email->pelanggan->email)
-                        <button class="btn btn-sm btn-success" onclick="kirimEmailLagi()">
-                            <i class="bi bi-send"></i> Kirim Lagi
-                        </button>
+                        <form action="{{ route('emails.send', $email) }}" method="POST" class="d-inline"
+                              onsubmit="return confirm('Kirim email ke ' + '{{ $email->pelanggan->email }}' + '?')">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-success">
+                                <i class="bi bi-send"></i> Kirim Email
+                            </button>
+                        </form>
                         @endif
                         <a href="{{ route('emails.edit', $email) }}" class="btn btn-sm btn-warning">
                             <i class="bi bi-pencil"></i> Edit
@@ -129,21 +133,4 @@
     </div>
 </div>
 
-@push('scripts')
-<script>
-function kirimEmailLagi() {
-    const toEmail = "{{ $email->pelanggan->email }}";
-    const subjek = "{{ $email->subjek }}";
-    const isiPesan = `{{ addslashes($email->isi_pesan) }}`;
-
-    if (!toEmail) {
-        alert('Pelanggan tidak memiliki email!');
-        return;
-    }
-
-    const mailtoLink = `mailto:${toEmail}?subject=${encodeURIComponent(subjek)}&body=${encodeURIComponent(isiPesan)}`;
-    window.location.href = mailtoLink;
-}
-</script>
-@endpush
 @endsection

@@ -86,9 +86,15 @@
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-save"></i> Update Email
                         </button>
-                        <button type="button" class="btn btn-success" id="sendEmailBtn">
-                            <i class="bi bi-envelope"></i> Kirim Email
-                        </button>
+                        @if($email->pelanggan->email)
+                        <form action="{{ route('emails.send', $email) }}" method="POST" class="d-inline"
+                              onsubmit="return confirm('Kirim email ke ' + '{{ $email->pelanggan->email }}' + '?')">
+                            @csrf
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-send"></i> Kirim Email
+                            </button>
+                        </form>
+                        @endif
                         <a href="{{ route('emails.show', $email) }}" class="btn btn-secondary">
                             <i class="bi bi-x-circle"></i> Batal
                         </a>
@@ -123,26 +129,6 @@ const isiPesan = document.getElementById('isi_pesan');
 const charCount = document.getElementById('char-count');
 isiPesan.addEventListener('input', function() {
     charCount.textContent = this.value.length;
-});
-
-// Send Email Button
-const sendEmailBtn = document.getElementById('sendEmailBtn');
-const pelangganSelect = document.getElementById('id_pelanggan');
-const subjekInput = document.getElementById('subjek');
-
-sendEmailBtn.addEventListener('click', function() {
-    const selected = pelangganSelect.options[pelangganSelect.selectedIndex];
-    const toEmail = selected.dataset.email;
-    const subjek = subjekInput.value;
-    const isiPesanValue = isiPesan.value;
-
-    if (!toEmail || toEmail === 'null') {
-        alert('Pelanggan tidak memiliki email!');
-        return;
-    }
-
-    const mailtoLink = `mailto:${toEmail}?subject=${encodeURIComponent(subjek)}&body=${encodeURIComponent(isiPesanValue)}`;
-    window.location.href = mailtoLink;
 });
 </script>
 @endpush

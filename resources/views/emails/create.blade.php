@@ -177,29 +177,18 @@ function checkSendButtonState() {
 subjekInput.addEventListener('input', checkSendButtonState);
 isiPesan.addEventListener('input', checkSendButtonState);
 
-// Send Email Button - Open email client with pre-filled data
+// Send Email after save
 sendEmailBtn.addEventListener('click', function() {
-    const selected = pelangganSelect.options[pelangganSelect.selectedIndex];
-    const toEmail = selected.dataset.email;
-    const customerName = selected.dataset.nama;
-    const subjek = subjekInput.value;
-    const isiPesanValue = isiPesan.value;
+    // First submit the form to save email record
+    document.getElementById('emailForm').addEventListener('submit', function(e) {
+        // Form will be saved first
+    });
 
-    if (!toEmail || toEmail === 'null') {
-        alert('Pelanggan tidak memiliki email!');
-        return;
-    }
+    // Submit form
+    const form = document.getElementById('emailForm');
+    form.submit();
 
-    // Create mailto link
-    const mailtoLink = `mailto:${toEmail}?subject=${encodeURIComponent(subjek)}&body=${encodeURIComponent(isiPesanValue)}`;
-
-    // Open email client
-    window.location.href = mailtoLink;
-
-    // Show success message
-    setTimeout(() => {
-        alert('Email client telah dibuka!\n\nSetelah mengirim email, kembali ke form ini dan klik "Simpan Riwayat" untuk mencatat komunikasi.');
-    }, 500);
+    alert('Email sedang disiapkan untuk dikirim...');
 });
 </script>
 @endpush

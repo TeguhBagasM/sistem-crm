@@ -17,6 +17,9 @@ class RiwayatEmail extends Model
         'isi_pesan',
         'dikirim_oleh',
         'waktu_kirim',
+        'status_kirim',
+        'waktu_terkirim',
+        'error_message',
     ];
 
     protected $casts = [
