@@ -8,13 +8,44 @@ use Illuminate\Http\Request;
 
 class JadwalAktivitasController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $aktivitas = JadwalAktivitas::with(['pelanggan', 'pembuat'])
-            ->latest()
-            ->paginate(15);
+        $query = JadwalAktivitas::with(['pelanggan', 'pembuat']);
 
-        return view('aktivitas.index', compact('aktivitas'));
+        // Filter by jenis_aktivitas
+        if ($request->filled('jenis_aktivitas')) {
+            $query->where('jenis_aktivitas', $request->jenis_aktivitas);
+        }
+
+        // Filter by status_aktivitas
+        if ($request->filled('status_aktivitas')) {
+            $query->where('status_aktivitas', $request->status_aktivitas);
+        }
+
+        // Filter by date range
+        if ($request->filled('tanggal_dari')) {
+            $query->whereDate('tanggal_jadwal', '>=', $request->tanggal_dari);
+        }
+
+        if ($request->filled('tanggal_sampai')) {
+            $query->whereDate('tanggal_jadwal', '<=', $request->tanggal_sampai);
+        }
+
+        $aktivitas = $query->latest()->paginate(15);
+
+        // Statistics
+        $totalAktivitas = JadwalAktivitas::count();
+        $aktivitasDirencanakan = JadwalAktivitas::where('status_aktivitas', 'direncanakan')->count();
+        $aktivitasSelesai = JadwalAktivitas::where('status_aktivitas', 'selesai')->count();
+        $aktivitasHariIni = JadwalAktivitas::whereDate('tanggal_jadwal', now()->toDateString())->count();
+
+        return view('aktivitas.index', compact(
+            'aktivitas',
+            'totalAktivitas',
+            'aktivitasDirencanakan',
+            'aktivitasSelesai',
+            'aktivitasHariIni'
+        ));
     }
 
     public function create()
@@ -42,19 +73,21 @@ class JadwalAktivitasController extends Controller
             ->with('success', 'Jadwal aktivitas berhasil ditambahkan!');
     }
 
-    public function show(JadwalAktivitas $aktivitas)
+    public function show(JadwalAktivitas $aktivita)
     {
+        $aktivitas = $aktivita; // Fix naming for consistency
         $aktivitas->load(['pelanggan', 'pembuat']);
         return view('aktivitas.show', compact('aktivitas'));
     }
 
-    public function edit(JadwalAktivitas $aktivitas)
+    public function edit(JadwalAktivitas $aktivita)
     {
+        $aktivitas = $aktivita; // Fix naming for consistency
         $pelanggan = Pelanggan::aktif()->orderBy('nama')->get();
         return view('aktivitas.edit', compact('aktivitas', 'pelanggan'));
     }
 
-    public function update(Request $request, JadwalAktivitas $aktivitas)
+    public function update(Request $request, JadwalAktivitas $aktivita)
     {
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
@@ -65,27 +98,27 @@ class JadwalAktivitasController extends Controller
             'id_pelanggan' => 'nullable|exists:pelanggan,id',
         ]);
 
-        $aktivitas->update($validated);
+        $aktivita->update($validated);
 
         return redirect()->route('aktivitas.index')
             ->with('success', 'Jadwal aktivitas berhasil diperbarui!');
     }
 
-    public function destroy(JadwalAktivitas $aktivitas)
+    public function destroy(JadwalAktivitas $aktivita)
     {
-        $aktivitas->delete();
+        $aktivita->delete();
 
         return redirect()->route('aktivitas.index')
             ->with('success', 'Jadwal aktivitas berhasil dihapus!');
     }
 
-    public function updateStatus(Request $request, JadwalAktivitas $aktivitas)
+    public function updateStatus(Request $request, JadwalAktivitas $aktivita)
     {
         $validated = $request->validate([
             'status_aktivitas' => 'required|in:direncanakan,selesai',
         ]);
 
-        $aktivitas->update($validated);
+        $aktivita->update($validated);
 
         return back()->with('success', 'Status aktivitas berhasil diperbarui!');
     }
