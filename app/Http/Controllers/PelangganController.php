@@ -4,17 +4,42 @@ namespace App\Http\Controllers;
 
 use App\Models\Pelanggan;
 use App\Models\CalonPelanggan;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class PelangganController extends Controller
 {
     public function index()
     {
-        $pelanggan = Pelanggan::with('pemilik')
-            ->latest()
-            ->paginate(15);
+        $query = Pelanggan::with('pemilik');
 
-        return view('pelanggan.index', compact('pelanggan'));
+        // Search filter
+        if (request('search')) {
+            $query->where('nama', 'like', '%' . request('search') . '%')
+                  ->orWhere('no_telepon', 'like', '%' . request('search') . '%');
+        }
+
+        // Status filter
+        if (request('status')) {
+            $query->where('status_pelanggan', request('status'));
+        }
+
+        // Owner filter
+        if (request('pemilik')) {
+            $query->where('pemilik_data', request('pemilik'));
+        }
+
+        $pelanggan = $query->latest()->paginate(15);
+
+        // Statistics
+        $aktifCount = Pelanggan::where('status_pelanggan', 'aktif')->count();
+        $tidakAktifCount = Pelanggan::where('status_pelanggan', 'tidak_aktif')->count();
+        $konversiCount = Pelanggan::whereNotNull('id_calon_pelanggan')->count();
+
+        // User list for filter
+        $userList = User::all();
+
+        return view('pelanggan.index', compact('pelanggan', 'aktifCount', 'tidakAktifCount', 'konversiCount', 'userList'));
     }
 
     public function create()

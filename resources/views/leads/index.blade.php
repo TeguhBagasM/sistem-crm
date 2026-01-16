@@ -13,6 +13,101 @@
     </a>
 </div>
 
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-2">Total Lead</h6>
+                        <h4 class="mb-0">{{ $leads->total() }}</h4>
+                    </div>
+                    <i class="bi bi-person-plus-fill" style="font-size: 3rem; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-2">Qualified</h6>
+                        <h4 class="mb-0">{{ $qualifiedCount ?? 0 }}</h4>
+                    </div>
+                    <i class="bi bi-check-circle-fill" style="font-size: 3rem; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-2">Dihubungi</h6>
+                        <h4 class="mb-0">{{ $dihubungiCount ?? 0 }}</h4>
+                    </div>
+                    <i class="bi bi-telephone-fill" style="font-size: 3rem; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-danger">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-2">Gagal</h6>
+                        <h4 class="mb-0">{{ $gagalCount ?? 0 }}</h4>
+                    </div>
+                    <i class="bi bi-x-circle-fill" style="font-size: 3rem; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Section -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form action="{{ route('leads.index') }}" method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label for="search" class="form-label">Cari Lead</label>
+                <input type="text" class="form-control" id="search" name="search"
+                       value="{{ request('search') }}" placeholder="Nama atau no. telepon...">
+            </div>
+            <div class="col-md-3">
+                <label for="sumber" class="form-label">Sumber</label>
+                <select class="form-select" id="sumber" name="sumber">
+                    <option value="">Semua Sumber</option>
+                    <option value="IG" {{ request('sumber') == 'IG' ? 'selected' : '' }}>Instagram</option>
+                    <option value="Website" {{ request('sumber') == 'Website' ? 'selected' : '' }}>Website</option>
+                    <option value="WA" {{ request('sumber') == 'WA' ? 'selected' : '' }}>WhatsApp</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">Semua Status</option>
+                    <option value="baru" {{ request('status') == 'baru' ? 'selected' : '' }}>Baru</option>
+                    <option value="dihubungi" {{ request('status') == 'dihubungi' ? 'selected' : '' }}>Dihubungi</option>
+                    <option value="qualified" {{ request('status') == 'qualified' ? 'selected' : '' }}>Qualified</option>
+                    <option value="gagal" {{ request('status') == 'gagal' ? 'selected' : '' }}>Gagal</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label d-block">&nbsp;</label>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search"></i> Filter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lead List -->
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
@@ -38,16 +133,12 @@
                         <td>{{ $lead->no_telepon }}</td>
                         <td><span class="badge bg-secondary">{{ $lead->sumber }}</span></td>
                         <td>
-                            <form action="{{ route('leads.update-status', $lead) }}" method="POST" class="d-inline status-form">
-                                @csrf
-                                @method('PATCH')
-                                <select class="form-select form-select-sm status-select" name="status_lead" data-lead-id="{{ $lead->id }}">
-                                    <option value="baru" {{ $lead->status_lead == 'baru' ? 'selected' : '' }}>Baru</option>
-                                    <option value="dihubungi" {{ $lead->status_lead == 'dihubungi' ? 'selected' : '' }}>Dihubungi</option>
-                                    <option value="qualified" {{ $lead->status_lead == 'qualified' ? 'selected' : '' }}>Qualified</option>
-                                    <option value="gagal" {{ $lead->status_lead == 'gagal' ? 'selected' : '' }}>Gagal</option>
-                                </select>
-                            </form>
+                            <select class="form-select form-select-sm status-select" data-lead-id="{{ $lead->id }}" onchange="updateLeadStatus(this)">
+                                <option value="baru" {{ $lead->status_lead == 'baru' ? 'selected' : '' }}>Baru</option>
+                                <option value="dihubungi" {{ $lead->status_lead == 'dihubungi' ? 'selected' : '' }}>Dihubungi</option>
+                                <option value="qualified" {{ $lead->status_lead == 'qualified' ? 'selected' : '' }}>Qualified</option>
+                                <option value="gagal" {{ $lead->status_lead == 'gagal' ? 'selected' : '' }}>Gagal</option>
+                            </select>
                         </td>
                         <td>{{ $lead->pembuatData->name }}</td>
                         <td>
@@ -90,51 +181,78 @@
 
 @push('scripts')
 <script>
-// Auto-submit form when status select changes
-document.querySelectorAll('.status-select').forEach(select => {
-    select.addEventListener('change', function() {
-        const form = this.closest('.status-form');
-        
-        // Show loading state
-        const originalText = this.innerHTML;
-        this.disabled = true;
-        this.style.opacity = '0.5';
-        
-        // Submit form via AJAX
-        fetch(form.action, {
-            method: 'POST',
-            body: new FormData(form),
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
+function updateLeadStatus(selectElement) {
+    // Get leadId from data attribute
+    const leadId = selectElement.dataset.leadId;
+    const newStatus = selectElement.value;
+    const previousStatus = selectElement.dataset.previousValue;
+
+    // Validasi leadId
+    if (!leadId) {
+        console.error('Lead ID tidak ditemukan!');
+        alert('❌ Error: Lead ID tidak ditemukan');
+        return;
+    }
+
+    // Show loading state
+    selectElement.disabled = true;
+
+    console.log(`Mengubah status lead ${leadId} menjadi ${newStatus}`);
+
+    // Submit via AJAX dengan PATCH method
+    fetch(`/leads/${leadId}/status`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            status_lead: newStatus
         })
-        .then(response => {
-            if (response.ok) {
-                // Show success message
-                const badge = this.closest('td');
-                const statusValue = this.value;
-                const statusText = this.options[this.selectedIndex].text;
-                
-                // Optional: Show toast/alert
-                console.log('Status berhasil diubah ke: ' + statusText);
-            } else {
-                throw new Error('Gagal mengubah status');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Gagal mengubah status. Silakan coba lagi.');
-            // Revert to previous selection
-            this.value = this.dataset.previousValue || '';
-        })
-        .finally(() => {
-            // Remove loading state
-            this.disabled = false;
-            this.style.opacity = '1';
-        });
+    })
+    .then(response => {
+        console.log('Response Status:', response.status);
+
+        if (response.status === 200) {
+            return response.json().then(data => {
+                selectElement.dataset.previousValue = newStatus;
+                console.log('✓ Status berhasil diubah menjadi: ' + newStatus);
+                selectElement.disabled = false;
+                return;
+            });
+        } else if (response.status === 422) {
+            return response.json().then(data => {
+                console.error('Validation Error:', data);
+                const errorMsg = data.errors?.status_lead?.[0] || 'Validasi gagal';
+                alert('❌ ' + errorMsg);
+                selectElement.value = previousStatus || '';
+                selectElement.disabled = false;
+            });
+        } else {
+            return response.json().then(data => {
+                console.error('Server Error:', data);
+                alert('❌ Error ' + response.status + ': ' + (data.message || 'Gagal mengubah status'));
+                selectElement.value = previousStatus || '';
+                selectElement.disabled = false;
+            }).catch(err => {
+                console.error('Error parsing response:', err);
+                alert('❌ Terjadi kesalahan. Silakan coba lagi.');
+                selectElement.value = previousStatus || '';
+                selectElement.disabled = false;
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Fetch Error:', error);
+        alert('❌ Error: ' + error.message);
+        selectElement.value = previousStatus || '';
+        selectElement.disabled = false;
     });
-    
-    // Store initial value
+}
+
+// Store initial status values
+document.querySelectorAll('.status-select').forEach(select => {
     select.dataset.previousValue = select.value;
 });
 </script>

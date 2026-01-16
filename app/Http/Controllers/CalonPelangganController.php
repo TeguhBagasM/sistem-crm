@@ -4,16 +4,38 @@ namespace App\Http\Controllers;
 
 use App\Models\CalonPelanggan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CalonPelangganController extends Controller
 {
     public function index()
     {
-        $leads = CalonPelanggan::with('pembuatData')
-            ->latest()
-            ->paginate(15);
+        $query = CalonPelanggan::with('pembuatData');
 
-        return view('leads.index', compact('leads'));
+        // Search filter
+        if (request('search')) {
+            $query->where('nama', 'like', '%' . request('search') . '%')
+                  ->orWhere('no_telepon', 'like', '%' . request('search') . '%');
+        }
+
+        // Status filter
+        if (request('status')) {
+            $query->where('status_lead', request('status'));
+        }
+
+        // Source filter
+        if (request('sumber')) {
+            $query->where('sumber', request('sumber'));
+        }
+
+        $leads = $query->latest()->paginate(15);
+
+        // Statistics
+        $qualifiedCount = CalonPelanggan::where('status_lead', 'qualified')->count();
+        $dihubungiCount = CalonPelanggan::where('status_lead', 'dihubungi')->count();
+        $gagalCount = CalonPelanggan::where('status_lead', 'gagal')->count();
+
+        return view('leads.index', compact('leads', 'qualifiedCount', 'dihubungiCount', 'gagalCount'));
     }
 
     public function create()
@@ -78,12 +100,46 @@ class CalonPelangganController extends Controller
 
     public function updateStatus(Request $request, CalonPelanggan $lead)
     {
-        $validated = $request->validate([
-            'status_lead' => 'required|in:baru,dihubungi,qualified,gagal',
-        ]);
+        try {
+            $validated = $request->validate([
+                'status_lead' => 'required|in:baru,dihubungi,qualified,gagal',
+            ]);
 
-        $lead->update($validated);
+            $lead->update($validated);
 
-        return back()->with('success', 'Status lead berhasil diperbarui!');
+            // Return JSON response untuk AJAX request
+            if ($request->wantsJson() || $request->isXmlHttpRequest()) {
+                return response()->json([
+                    'message' => 'Status lead berhasil diperbarui!',
+                    'status' => 'success',
+                    'data' => [
+                        'id' => $lead->id,
+                        'status_lead' => $lead->status_lead
+                    ]
+                ], 200);
+            }
+
+            // Fallback untuk regular request
+            return back()->with('success', 'Status lead berhasil diperbarui!');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->wantsJson() || $request->isXmlHttpRequest()) {
+                return response()->json([
+                    'message' => 'Validasi gagal',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            throw $e;
+        } catch (\Exception $e) {
+            \Log::error('Error updating lead status: ' . $e->getMessage());
+
+            if ($request->wantsJson() || $request->isXmlHttpRequest()) {
+                return response()->json([
+                    'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                    'status' => 'error'
+                ], 500);
+            }
+            throw $e;
+        }
     }
 }
