@@ -47,8 +47,15 @@
                         <div class="col-md-6">
                             <p class="mb-2">
                                 <strong><i class="bi bi-person-check"></i> Kepada:</strong><br>
-                                <span class="text-primary">{{ $email->pelanggan->nama }}</span><br>
+                                @if($email->id_pelanggan)
+                                <span class="text-primary">{{ $email->pelanggan->nama }}</span> <span class="badge bg-info">Pelanggan</span><br>
                                 <small class="text-muted">{{ $email->pelanggan->email ?? 'Tidak ada email' }}</small>
+                                @elseif($email->id_calon_pelanggan)
+                                <span class="text-primary">{{ $email->calonPelanggan->nama }}</span> <span class="badge bg-warning">Leads</span><br>
+                                <small class="text-muted">{{ $email->calonPelanggan->email ?? 'Tidak ada email' }}</small>
+                                @else
+                                <span class="text-muted">-</span>
+                                @endif
                             </p>
                         </div>
                     </div>

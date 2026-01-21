@@ -13,6 +13,7 @@ class RiwayatEmail extends Model
 
     protected $fillable = [
         'id_pelanggan',
+        'id_calon_pelanggan',
         'subjek',
         'isi_pesan',
         'dikirim_oleh',
@@ -31,6 +32,11 @@ class RiwayatEmail extends Model
     public function pelanggan()
     {
         return $this->belongsTo(Pelanggan::class, 'id_pelanggan');
+    }
+
+    public function calonPelanggan()
+    {
+        return $this->belongsTo(CalonPelanggan::class, 'id_calon_pelanggan');
     }
 
     public function pengirim()

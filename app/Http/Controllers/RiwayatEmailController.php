@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\RiwayatEmail;
 use App\Models\Pelanggan;
+use App\Models\CalonPelanggan;
 use Illuminate\Http\Request;
 
 class RiwayatEmailController extends Controller
 {
     public function index(Request $request)
     {
-        $query = RiwayatEmail::with(['pelanggan', 'pengirim']);
+        $query = RiwayatEmail::with(['pelanggan', 'calonPelanggan', 'pengirim']);
 
         // Filter by search
         if ($request->filled('search')) {
@@ -59,43 +60,63 @@ class RiwayatEmailController extends Controller
 
     public function create()
     {
-        $pelanggan = Pelanggan::aktif()->orderBy('nama')->get();
-        return view('emails.create', compact('pelanggan'));
+        $pelanggan = Pelanggan::aktif()->latest()->get();
+        $leads = CalonPelanggan::latest()->get();
+
+        return view('emails.create', compact('pelanggan', 'leads'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'id_pelanggan' => 'required|exists:pelanggan,id',
+            'id_pelanggan' => 'nullable|exists:pelanggan,id',
+            'id_calon_pelanggan' => 'nullable|exists:calon_pelanggan,id',
             'subjek' => 'required|string|max:255',
             'isi_pesan' => 'required|string',
             'waktu_kirim' => 'required|date',
             'action' => 'required|in:save_only,send_email',
         ]);
 
+        // Validate at least one recipient is selected
+        if (empty($validated['id_pelanggan']) && empty($validated['id_calon_pelanggan'])) {
+            return back()->with('error', 'Pilih pelanggan atau leads!')
+                        ->withInput();
+        }
+
         $validated['dikirim_oleh'] = auth()->id();
         $validated['status_kirim'] = 'draft';
 
+        // Get the recipient
+        $email = null;
+        $nama = null;
+
+        if ($validated['id_pelanggan']) {
+            $recipient = Pelanggan::findOrFail($validated['id_pelanggan']);
+            $email = $recipient->email;
+            $nama = $recipient->nama;
+        } else {
+            $recipient = CalonPelanggan::findOrFail($validated['id_calon_pelanggan']);
+            $email = $recipient->email;
+            $nama = $recipient->nama;
+        }
+
         // If action is send_email, send it
         if ($validated['action'] === 'send_email') {
-            $pelanggan = Pelanggan::findOrFail($validated['id_pelanggan']);
-
-            // Check if pelanggan has email
-            if (!$pelanggan->email) {
-                return back()->with('error', 'Pelanggan tidak memiliki alamat email!')
+            // Check if recipient has email
+            if (!$email) {
+                return back()->with('error', 'Penerima tidak memiliki alamat email!')
                             ->withInput();
             }
 
             try {
                 // Send email
-                \Illuminate\Support\Facades\Mail::raw($validated['isi_pesan'], function ($message) use ($pelanggan, $validated) {
-                    $message->to($pelanggan->email)
+                \Illuminate\Support\Facades\Mail::raw($validated['isi_pesan'], function ($message) use ($email, $nama, $validated) {
+                    $message->to($email)
                             ->subject($validated['subjek']);
                 });
 
                 $validated['status_kirim'] = 'sent';
                 $validated['waktu_terkirim'] = now();
-                $message = 'Email berhasil dikirim!';
             } catch (\Exception $e) {
                 $validated['status_kirim'] = 'failed';
                 $validated['error_message'] = $e->getMessage();
@@ -121,44 +142,61 @@ class RiwayatEmailController extends Controller
 
     public function edit(RiwayatEmail $email)
     {
-        $pelanggan = Pelanggan::aktif()->orderBy('nama')->get();
-        return view('emails.edit', compact('email', 'pelanggan'));
+        $pelanggan = Pelanggan::aktif()->latest()->get();
+        $leads = CalonPelanggan::latest()->get();
+
+        return view('emails.edit', compact('email', 'pelanggan', 'leads'));
     }
 
     public function update(Request $request, RiwayatEmail $email)
     {
         $validated = $request->validate([
-            'id_pelanggan' => 'required|exists:pelanggan,id',
+            'id_pelanggan' => 'nullable|exists:pelanggan,id',
+            'id_calon_pelanggan' => 'nullable|exists:calon_pelanggan,id',
             'subjek' => 'required|string|max:255',
             'isi_pesan' => 'required|string',
             'waktu_kirim' => 'required|date',
             'action' => 'required|in:save_only,send_email',
         ]);
 
+        // Validate at least one recipient is selected
+        if (empty($validated['id_pelanggan']) && empty($validated['id_calon_pelanggan'])) {
+            return back()->with('error', 'Pilih pelanggan atau leads!')
+                        ->withInput();
+        }
+
         // Remove action field from validated (don't save to DB)
         $action = $validated['action'];
         unset($validated['action']);
 
+        // Get the recipient
+        $recipientEmail = null;
+
+        if ($validated['id_pelanggan']) {
+            $recipient = Pelanggan::findOrFail($validated['id_pelanggan']);
+            $recipientEmail = $recipient->email;
+        } elseif ($validated['id_calon_pelanggan']) {
+            $recipient = CalonPelanggan::findOrFail($validated['id_calon_pelanggan']);
+            $recipientEmail = $recipient->email;
+        }
+
         // If action is send_email, send it
         if ($action === 'send_email') {
-            $pelanggan = Pelanggan::findOrFail($validated['id_pelanggan']);
-
-            // Check if pelanggan has email
-            if (!$pelanggan->email) {
-                return back()->with('error', 'Pelanggan tidak memiliki alamat email!')
+            // Check if recipient has email
+            if (!$recipientEmail) {
+                return back()->with('error', 'Penerima tidak memiliki alamat email!')
                             ->withInput();
             }
 
             try {
                 // Send email
-                \Illuminate\Support\Facades\Mail::raw($validated['isi_pesan'], function ($message) use ($pelanggan, $validated) {
-                    $message->to($pelanggan->email)
+                \Illuminate\Support\Facades\Mail::raw($validated['isi_pesan'], function ($message) use ($recipientEmail, $validated) {
+                    $message->to($recipientEmail)
                             ->subject($validated['subjek']);
                 });
 
                 $validated['status_kirim'] = 'sent';
                 $validated['waktu_terkirim'] = now();
-                $message = 'Email berhasil dikirim dan data diperbarui!';
             } catch (\Exception $e) {
                 $validated['status_kirim'] = 'failed';
                 $validated['error_message'] = $e->getMessage();

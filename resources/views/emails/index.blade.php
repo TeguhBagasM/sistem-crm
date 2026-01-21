@@ -112,7 +112,7 @@
                 <thead>
                     <tr>
                         <th width="5%">#</th>
-                        <th width="20%">Pelanggan</th>
+                        <th width="20%">Penerima</th>
                         <th width="25%">Subjek</th>
                         <th width="15%">Waktu Kirim</th>
                         <th width="15%">Dikirim Oleh</th>
@@ -125,8 +125,15 @@
                     <tr>
                         <td>{{ $loop->iteration + ($emails->currentPage() - 1) * $emails->perPage() }}</td>
                         <td>
-                            <strong>{{ $email->pelanggan->nama }}</strong><br>
+                            @if($email->id_pelanggan)
+                            <strong>{{ $email->pelanggan->nama }}</strong> <span class="badge bg-info">Pelanggan</span><br>
                             <small class="text-muted">{{ $email->pelanggan->email }}</small>
+                            @elseif($email->id_calon_pelanggan)
+                            <strong>{{ $email->calonPelanggan->nama }}</strong> <span class="badge bg-warning">Leads</span><br>
+                            <small class="text-muted">{{ $email->calonPelanggan->email }}</small>
+                            @else
+                            <span class="text-muted">-</span>
+                            @endif
                         </td>
                         <td>
                             <strong>{{ $email->subjek }}</strong><br>
