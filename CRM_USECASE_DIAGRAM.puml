@@ -1,0 +1,152 @@
+@startuml CRM_UseCase_Diagram
+!theme plain
+skinparam actorStyle awesome
+skinparam backgroundColor #f0f0f0
+
+actor Admin
+actor "Marketing User" as Marketing
+
+package "CRM System" {
+
+    ' User Management (Admin Only)
+    usecase UC1 as "Manage Users"
+    usecase UC1A as "Create User"
+    usecase UC1B as "Edit User"
+    usecase UC1C as "Delete User"
+    usecase UC1D as "Assign Role"
+
+    UC1 --> UC1A : include
+    UC1 --> UC1B : include
+    UC1 --> UC1C : include
+    UC1 --> UC1D : include
+
+    ' Lead Management
+    usecase UC2 as "Manage Leads"
+    usecase UC2A as "Create Lead"
+    usecase UC2B as "View Lead"
+    usecase UC2C as "Edit Lead"
+    usecase UC2D as "Delete Lead"
+    usecase UC2E as "Change Lead Status"
+    usecase UC2F as "Convert Lead to Contact"
+
+    UC2 --> UC2A : include
+    UC2 --> UC2B : include
+    UC2 --> UC2C : include
+    UC2 --> UC2D : include
+    UC2 --> UC2E : include
+    UC2 --> UC2F : extend
+
+    ' Contact Management
+    usecase UC3 as "Manage Contacts"
+    usecase UC3A as "Create Contact"
+    usecase UC3B as "View Contact"
+    usecase UC3C as "Edit Contact"
+    usecase UC3D as "Delete Contact"
+    usecase UC3E as "Assign Tags"
+    usecase UC3F as "Segment Contact"
+    usecase UC3G as "Set Priority"
+
+    UC3 --> UC3A : include
+    UC3 --> UC3B : include
+    UC3 --> UC3C : include
+    UC3 --> UC3D : include
+    UC3 --> UC3E : extend
+    UC3 --> UC3F : extend
+    UC3 --> UC3G : extend
+
+    ' Email Management
+    usecase UC4 as "Manage Emails"
+    usecase UC4A as "View Email List"
+    usecase UC4B as "Create Email Record"
+    usecase UC4C as "Send Email"
+    usecase UC4D as "Edit Email"
+    usecase UC4E as "Delete Email Record"
+    usecase UC4F as "Validate Email Address"
+    usecase UC4G as "Track Email Status"
+
+    UC4 --> UC4A : include
+    UC4 --> UC4B : include
+    UC4 --> UC4C : include
+    UC4 --> UC4D : include
+    UC4 --> UC4E : include
+    UC4 --> UC4F : include
+    UC4 --> UC4G : include
+    UC4C --|> UC4F : extend
+
+    ' Activity Management
+    usecase UC5 as "Manage Activities"
+    usecase UC5A as "Create Activity"
+    usecase UC5B as "View Activity"
+    usecase UC5C as "Edit Activity"
+    usecase UC5D as "Delete Activity"
+    usecase UC5E as "Change Activity Status"
+    usecase UC5F as "View Calendar"
+    usecase UC5G as "Filter by Date"
+
+    UC5 --> UC5A : include
+    UC5 --> UC5B : include
+    UC5 --> UC5C : include
+    UC5 --> UC5D : include
+    UC5 --> UC5E : extend
+    UC5 --> UC5F : include
+    UC5F --> UC5G : include
+
+    ' Dashboard
+    usecase UC6 as "View Dashboard"
+    usecase UC6A as "View Statistics"
+    usecase UC6B as "View Charts"
+    usecase UC6C as "View Role-based Data"
+
+    UC6 --> UC6A : include
+    UC6 --> UC6B : include
+    UC6 --> UC6C : include
+
+    ' Authentication
+    usecase UC7 as "Login"
+    usecase UC7A as "Authenticate User"
+    usecase UC7B as "Validate Credentials"
+
+    UC7 --> UC7A : include
+    UC7A --> UC7B : include
+}
+
+' Actor Relationships
+Admin --> UC1 : manage
+Admin --> UC6 : view
+Admin --> UC7 : perform
+
+Marketing --> UC2 : manage
+Marketing --> UC3 : manage
+Marketing --> UC4 : manage
+Marketing --> UC5 : manage
+Marketing --> UC6 : view
+Marketing --> UC7 : perform
+
+' Notes
+note right of Admin
+  Admin dapat:
+  - Manage semua users
+  - Akses semua data
+  - View dashboard
+end note
+
+note right of Marketing
+  Marketing dapat:
+  - Manage leads
+  - Manage contacts
+  - Send emails
+  - Manage activities
+  - View dashboard mereka
+end note
+
+note bottom of UC2F
+  Ketika lead di-convert ke contact,
+  status lead tidak bisa diubah lagi
+end note
+
+note bottom of UC4C
+  Kirim email via Mailtrap
+  (development only)
+end note
+
+@enduml

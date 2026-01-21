@@ -64,6 +64,14 @@ class DashboardController extends Controller
                         RiwayatEmail::count(),
                     ],
                 ],
+
+                'aktivitas_chart' => [
+                    'labels' => ['Direncanakan', 'Selesai'],
+                    'data' => [
+                        JadwalAktivitas::direncanakan()->count(),
+                        JadwalAktivitas::selesai()->count(),
+                    ],
+                ],
             ];
         }
         // Marketing 1 - Lead Management

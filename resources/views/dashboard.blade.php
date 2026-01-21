@@ -74,16 +74,20 @@
             <div class="card-header bg-white">
                 <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Lead Distribution</h5>
             </div>
-            <div class="card-body" id="leadsChart"></div>
+            <div class="card-body">
+                <canvas id="leadsChart" height="250"></canvas>
+            </div>
         </div>
     </div>
 
     <div class="col-md-4 mb-4">
         <div class="card">
             <div class="card-header bg-white">
-                <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Pelanggan Status</h5>
+                <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Status Aktivitas</h5>
             </div>
-            <div class="card-body" id="pelangganChart"></div>
+            <div class="card-body">
+                <canvas id="aktivitasChart" height="200"></canvas>
+            </div>
         </div>
     </div>
 
@@ -92,7 +96,9 @@
             <div class="card-header bg-white">
                 <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Email Stats</h5>
             </div>
-            <div class="card-body" id="emailChart"></div>
+            <div class="card-body">
+                <canvas id="emailChart" height="250"></canvas>
+            </div>
         </div>
     </div>
 </div>
@@ -165,7 +171,9 @@
             <div class="card-header bg-white">
                 <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Distribusi Lead</h5>
             </div>
-            <div class="card-body" id="leadsChart"></div>
+            <div class="card-body">
+                <canvas id="leadsChart" height="200"></canvas>
+            </div>
         </div>
     </div>
 
@@ -272,7 +280,9 @@
             <div class="card-header bg-white">
                 <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Status Pelanggan</h5>
             </div>
-            <div class="card-body" id="pelangganChart"></div>
+            <div class="card-body">
+                <canvas id="pelangganChart" height="200"></canvas>
+            </div>
         </div>
     </div>
 
@@ -379,7 +389,9 @@
             <div class="card-header bg-white">
                 <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Email Statistics</h5>
             </div>
-            <div class="card-body" id="emailChart"></div>
+            <div class="card-body">
+                <canvas id="emailChart" height="200"></canvas>
+            </div>
         </div>
     </div>
 
@@ -486,7 +498,9 @@
             <div class="card-header bg-white">
                 <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Status Aktivitas</h5>
             </div>
-            <div class="card-body" id="aktivitasChart"></div>
+            <div class="card-body">
+                <canvas id="aktivitasChart" height="200"></canvas>
+            </div>
         </div>
     </div>
 
@@ -528,182 +542,263 @@
 @endif
 
 @endsection
-
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
+    // Chart Configuration
+    Chart.defaults.font.family = "'Nunito', sans-serif";
+    Chart.defaults.color = '#858796';
+
     @if($data['role'] === 'admin')
-        // Admin Charts
-        const leadsData = {
-            labels: @json($data['leads_chart']['labels']),
-            data: @json($data['leads_chart']['data']),
-        };
-
-        const leadsCtx = document.getElementById('leadsChart');
-        let leadsHtml = '<div style="display: flex; gap: 8px; align-items: flex-end; height: 200px;">';
-        const maxLeads = Math.max(...leadsData.data);
-        const leadColors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe'];
-
-        leadsData.data.forEach((value, index) => {
-            const height = (value / maxLeads) * 160;
-            leadsHtml += `
-                <div style="flex: 1; text-align: center;">
-                    <div style="background: ${leadColors[index % leadColors.length]}; height: ${height}px; border-radius: 6px; margin-bottom: 8px;"></div>
-                    <div style="font-size: 0.8rem; font-weight: 600;">${value}</div>
-                    <div style="font-size: 0.65rem; color: #666;">${leadsData.labels[index]}</div>
-                </div>
-            `;
+        // Admin - Leads Bar Chart
+        new Chart(document.getElementById('leadsChart'), {
+            type: 'bar',
+            data: {
+                labels: @json($data['leads_chart']['labels']),
+                datasets: [{
+                    label: 'Jumlah Lead',
+                    data: @json($data['leads_chart']['data']),
+                    backgroundColor: [
+                        'rgba(102, 126, 234, 0.8)',
+                        'rgba(118, 75, 162, 0.8)',
+                        'rgba(237, 100, 166, 0.8)',
+                        'rgba(79, 172, 254, 0.8)',
+                        'rgba(0, 242, 254, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgb(102, 126, 234)',
+                        'rgb(118, 75, 162)',
+                        'rgb(237, 100, 166)',
+                        'rgb(79, 172, 254)',
+                        'rgb(0, 242, 254)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
         });
-        leadsHtml += '</div>';
-        leadsCtx.innerHTML = leadsHtml;
 
-        // Pelanggan Pie
-        const pelangganData = {
-            labels: @json($data['pelanggan_chart']['labels']),
-            data: @json($data['pelanggan_chart']['data']),
-        };
-
-        const pelangganCtx = document.getElementById('pelangganChart');
-        const pelangganColors = ['#27ae60', '#95a5a6'];
-        let pelangganHtml = '<div style="padding: 15px;">';
-        pelangganData.data.forEach((value, index) => {
-            const percentage = pelangganData.data.reduce((a,b) => a+b) > 0
-                ? ((value / pelangganData.data.reduce((a,b) => a+b)) * 100).toFixed(0)
-                : 0;
-            pelangganHtml += `
-                <div style="margin: 10px 0; font-size: 0.9rem;">
-                    <span style="display: inline-block; width: 14px; height: 14px; background: ${pelangganColors[index]}; border-radius: 50%; margin-right: 8px;"></span>
-                    <strong>${pelangganData.labels[index]}:</strong> ${value} (${percentage}%)
-                </div>
-            `;
+        // Admin - Pelanggan Pie Chart
+        new Chart(document.getElementById('aktivitasChart'), {
+            type: 'doughnut',
+            data: {
+                labels: @json($data['aktivitas_chart']['labels']),
+                datasets: [{
+                    data: @json($data['aktivitas_chart']['data']),
+                    backgroundColor: [
+                        'rgba(243, 156, 18, 0.8)',
+                        'rgba(39, 174, 96, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgb(243, 156, 18)',
+                        'rgb(39, 174, 96)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 15 }
+                    }
+                }
+            }
         });
-        pelangganHtml += '</div>';
-        pelangganCtx.innerHTML = pelangganHtml;
 
-        // Email Bar
-        const emailData = {
-            labels: @json($data['email_chart']['labels']),
-            data: @json($data['email_chart']['data']),
-        };
-
-        const emailCtx = document.getElementById('emailChart');
-        let emailHtml = '<div style="display: flex; gap: 10px; align-items: flex-end; height: 200px;">';
-        const maxEmail = Math.max(...emailData.data);
-        const emailColors = ['#3498db', '#17a2b8', '#5dade2'];
-
-        emailData.data.forEach((value, index) => {
-            const height = (value / maxEmail) * 160;
-            emailHtml += `
-                <div style="flex: 1; text-align: center;">
-                    <div style="background: ${emailColors[index]}; height: ${height}px; border-radius: 6px; margin-bottom: 8px;"></div>
-                    <div style="font-size: 0.8rem; font-weight: 600;">${value}</div>
-                    <div style="font-size: 0.65rem; color: #666;">${emailData.labels[index]}</div>
-                </div>
-            `;
+        // Admin - Email Bar Chart
+        new Chart(document.getElementById('emailChart'), {
+            type: 'bar',
+            data: {
+                labels: @json($data['email_chart']['labels']),
+                datasets: [{
+                    label: 'Jumlah Email',
+                    data: @json($data['email_chart']['data']),
+                    backgroundColor: [
+                        'rgba(52, 152, 219, 0.8)',
+                        'rgba(23, 162, 184, 0.8)',
+                        'rgba(93, 173, 226, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgb(52, 152, 219)',
+                        'rgb(23, 162, 184)',
+                        'rgb(93, 173, 226)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
         });
-        emailHtml += '</div>';
-        emailCtx.innerHTML = emailHtml;
     @endif
 
     @if($data['role'] === 'marketing1')
-        // Marketing1 - Leads Chart
-        const leadsData = {
-            labels: @json($data['leads_chart']['labels']),
-            data: @json($data['leads_chart']['data']),
-        };
-
-        const leadsCtx = document.getElementById('leadsChart');
-        let leadsHtml = '<div style="display: flex; gap: 8px; align-items: flex-end; height: 220px;">';
-        const maxLeads = Math.max(...leadsData.data);
-        const leadColors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe'];
-
-        leadsData.data.forEach((value, index) => {
-            const height = (value / maxLeads) * 180;
-            leadsHtml += `
-                <div style="flex: 1; text-align: center;">
-                    <div style="background: ${leadColors[index % leadColors.length]}; height: ${height}px; border-radius: 6px; margin-bottom: 8px;"></div>
-                    <div style="font-size: 0.8rem; font-weight: 600;">${value}</div>
-                    <div style="font-size: 0.65rem; color: #666;">${leadsData.labels[index]}</div>
-                </div>
-            `;
+        // Marketing 1 - Leads Bar Chart
+        new Chart(document.getElementById('leadsChart'), {
+            type: 'bar',
+            data: {
+                labels: @json($data['leads_chart']['labels']),
+                datasets: [{
+                    label: 'Jumlah Lead',
+                    data: @json($data['leads_chart']['data']),
+                    backgroundColor: [
+                        'rgba(102, 126, 234, 0.8)',
+                        'rgba(118, 75, 162, 0.8)',
+                        'rgba(237, 100, 166, 0.8)',
+                        'rgba(79, 172, 254, 0.8)',
+                        'rgba(0, 242, 254, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgb(102, 126, 234)',
+                        'rgb(118, 75, 162)',
+                        'rgb(237, 100, 166)',
+                        'rgb(79, 172, 254)',
+                        'rgb(0, 242, 254)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
         });
-        leadsHtml += '</div>';
-        leadsCtx.innerHTML = leadsHtml;
     @endif
 
     @if($data['role'] === 'marketing2')
-        // Marketing2 - Pelanggan Chart
-        const pelangganData = {
-            labels: @json($data['pelanggan_chart']['labels']),
-            data: @json($data['pelanggan_chart']['data']),
-        };
-
-        const pelangganCtx = document.getElementById('pelangganChart');
-        const pelangganColors = ['#27ae60', '#95a5a6'];
-        let pelangganHtml = '<div style="padding: 25px; text-align: center;">';
-        pelangganData.data.forEach((value, index) => {
-            const percentage = pelangganData.data.reduce((a,b) => a+b) > 0
-                ? ((value / pelangganData.data.reduce((a,b) => a+b)) * 100).toFixed(0)
-                : 0;
-            pelangganHtml += `
-                <div style="margin: 15px 0; font-size: 1rem;">
-                    <span style="display: inline-block; width: 18px; height: 18px; background: ${pelangganColors[index]}; border-radius: 50%; margin-right: 10px;"></span>
-                    <strong>${pelangganData.labels[index]}:</strong> ${value} (${percentage}%)
-                </div>
-            `;
+        // Marketing 2 - Pelanggan Doughnut Chart
+        new Chart(document.getElementById('pelangganChart'), {
+            type: 'doughnut',
+            data: {
+                labels: @json($data['pelanggan_chart']['labels']),
+                datasets: [{
+                    data: @json($data['pelanggan_chart']['data']),
+                    backgroundColor: [
+                        'rgba(39, 174, 96, 0.8)',
+                        'rgba(149, 165, 166, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgb(39, 174, 96)',
+                        'rgb(149, 165, 166)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 15 }
+                    }
+                }
+            }
         });
-        pelangganHtml += '</div>';
-        pelangganCtx.innerHTML = pelangganHtml;
     @endif
 
     @if($data['role'] === 'marketing3')
-        // Marketing3 - Email Chart
-        const emailData = {
-            labels: @json($data['email_chart']['labels']),
-            data: @json($data['email_chart']['data']),
-        };
-
-        const emailCtx = document.getElementById('emailChart');
-        let emailHtml = '<div style="display: flex; gap: 10px; align-items: flex-end; height: 220px;">';
-        const maxEmail = Math.max(...emailData.data);
-        const emailColors = ['#3498db', '#17a2b8', '#5dade2'];
-
-        emailData.data.forEach((value, index) => {
-            const height = (value / maxEmail) * 180;
-            emailHtml += `
-                <div style="flex: 1; text-align: center;">
-                    <div style="background: ${emailColors[index]}; height: ${height}px; border-radius: 6px; margin-bottom: 8px;"></div>
-                    <div style="font-size: 0.8rem; font-weight: 600;">${value}</div>
-                    <div style="font-size: 0.65rem; color: #666;">${emailData.labels[index]}</div>
-                </div>
-            `;
+        // Marketing 3 - Email Bar Chart
+        new Chart(document.getElementById('emailChart'), {
+            type: 'bar',
+            data: {
+                labels: @json($data['email_chart']['labels']),
+                datasets: [{
+                    label: 'Jumlah Email',
+                    data: @json($data['email_chart']['data']),
+                    backgroundColor: [
+                        'rgba(52, 152, 219, 0.8)',
+                        'rgba(23, 162, 184, 0.8)',
+                        'rgba(93, 173, 226, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgb(52, 152, 219)',
+                        'rgb(23, 162, 184)',
+                        'rgb(93, 173, 226)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
         });
-        emailHtml += '</div>';
-        emailCtx.innerHTML = emailHtml;
     @endif
 
     @if($data['role'] === 'marketing4')
-        // Marketing4 - Aktivitas Pie
-        const aktivitasData = {
-            labels: @json($data['aktivitas_chart']['labels']),
-            data: @json($data['aktivitas_chart']['data']),
-        };
-
-        const aktivitasCtx = document.getElementById('aktivitasChart');
-        const aktivitasColors = ['#f39c12', '#27ae60'];
-        let aktivitasHtml = '<div style="padding: 25px; text-align: center;">';
-        aktivitasData.data.forEach((value, index) => {
-            const percentage = aktivitasData.data.reduce((a,b) => a+b) > 0
-                ? ((value / aktivitasData.data.reduce((a,b) => a+b)) * 100).toFixed(0)
-                : 0;
-            aktivitasHtml += `
-                <div style="margin: 15px 0; font-size: 1rem;">
-                    <span style="display: inline-block; width: 18px; height: 18px; background: ${aktivitasColors[index]}; border-radius: 50%; margin-right: 10px;"></span>
-                    <strong>${aktivitasData.labels[index]}:</strong> ${value} (${percentage}%)
-                </div>
-            `;
+        // Marketing 4 - Aktivitas Doughnut Chart
+        new Chart(document.getElementById('aktivitasChart'), {
+            type: 'doughnut',
+            data: {
+                labels: @json($data['aktivitas_chart']['labels']),
+                datasets: [{
+                    data: @json($data['aktivitas_chart']['data']),
+                    backgroundColor: [
+                        'rgba(243, 156, 18, 0.8)',
+                        'rgba(39, 174, 96, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgb(243, 156, 18)',
+                        'rgb(39, 174, 96)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 15 }
+                    }
+                }
+            }
         });
-        aktivitasHtml += '</div>';
-        aktivitasCtx.innerHTML = aktivitasHtml;
     @endif
 </script>
 @endpush
