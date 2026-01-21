@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\CalonPelangganController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\RiwayatEmailController;
@@ -23,6 +24,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Dashboard - Accessible by all authenticated users
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // User Management - Admin only
+    Route::resource('users', UserController::class);
 
     // Lead Management - Marketing1 & Admin only
     Route::middleware(['role:admin,marketing1'])->group(function () {

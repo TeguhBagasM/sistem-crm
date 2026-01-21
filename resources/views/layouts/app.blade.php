@@ -253,6 +253,12 @@
                         <i class="bi bi-speedometer2"></i> Dashboard
                     </a>
 
+                    @if(auth()->user()->isAdmin())
+                    <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
+                        <i class="bi bi-people-fill"></i> User Management
+                    </a>
+                    @endif
+
                     @if(auth()->user()->hasAccess(['marketing1']))
                     <a class="nav-link {{ request()->routeIs('leads.*') ? 'active' : '' }}" href="{{ route('leads.index') }}">
                         <i class="bi bi-person-plus"></i> Lead Management
