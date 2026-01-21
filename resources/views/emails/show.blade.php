@@ -83,13 +83,36 @@
                 <h6 class="card-title"><i class="bi bi-info-circle"></i> Informasi Email</h6>
                 <table class="table table-sm">
                     <tr>
-                        <td><strong>Status</strong></td>
+                        <td><strong>Status Kirim</strong></td>
                         <td>
-                            <span class="badge {{ $email->waktu_kirim->isToday() ? 'bg-success' : 'bg-secondary' }}">
-                                {{ $email->waktu_kirim->isToday() ? 'Baru Tercatat' : 'Tercatat' }}
-                            </span>
+                            @php
+                                $statusClass = match($email->status_kirim) {
+                                    'sent' => 'bg-success',
+                                    'draft' => 'bg-warning',
+                                    'failed' => 'bg-danger',
+                                    default => 'bg-secondary'
+                                };
+                                $statusLabel = match($email->status_kirim) {
+                                    'sent' => 'Terkirim ✓',
+                                    'draft' => 'Draft (Belum Dikirim)',
+                                    'failed' => 'Gagal Dikirim ✗',
+                                    default => 'Unknown'
+                                };
+                            @endphp
+                            <span class="badge {{ $statusClass }}">{{ $statusLabel }}</span>
                         </td>
                     </tr>
+                    @if($email->status_kirim === 'sent' && $email->waktu_terkirim)
+                    <tr>
+                        <td><strong>Waktu Terkirim</strong></td>
+                        <td>{{ $email->waktu_terkirim->format('d M Y H:i:s') }}</td>
+                    </tr>
+                    @elseif($email->status_kirim === 'failed' && $email->error_message)
+                    <tr>
+                        <td><strong>Error</strong></td>
+                        <td><small class="text-danger">{{ $email->error_message }}</small></td>
+                    </tr>
+                    @endif
                     <tr>
                         <td><strong>Dicatat</strong></td>
                         <td>{{ $email->created_at->format('d M Y H:i') }}</td>

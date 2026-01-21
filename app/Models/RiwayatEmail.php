@@ -24,6 +24,7 @@ class RiwayatEmail extends Model
 
     protected $casts = [
         'waktu_kirim' => 'datetime',
+        'waktu_terkirim' => 'datetime',
     ];
 
     // Relasi
@@ -35,5 +36,26 @@ class RiwayatEmail extends Model
     public function pengirim()
     {
         return $this->belongsTo(User::class, 'dikirim_oleh');
+    }
+
+    // Helper Methods
+    public function getStatusBadgeClass()
+    {
+        return match($this->status_kirim) {
+            'sent' => 'bg-success',
+            'draft' => 'bg-warning',
+            'failed' => 'bg-danger',
+            default => 'bg-secondary'
+        };
+    }
+
+    public function getStatusLabel()
+    {
+        return match($this->status_kirim) {
+            'sent' => 'Terkirim ✓',
+            'draft' => 'Draft (Belum Dikirim)',
+            'failed' => 'Gagal Dikirim ✗',
+            default => 'Unknown'
+        };
     }
 }

@@ -65,20 +65,6 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
-
-                    <div class="mb-3">
-                        <label for="status_lead" class="form-label">Status Lead <span class="text-danger">*</span></label>
-                        <select class="form-select @error('status_lead') is-invalid @enderror" id="status_lead" name="status_lead" required>
-                            <option value="baru" {{ old('status_lead', $lead->status_lead) == 'baru' ? 'selected' : '' }}>Baru</option>
-                            <option value="dihubungi" {{ old('status_lead', $lead->status_lead) == 'dihubungi' ? 'selected' : '' }}>Dihubungi</option>
-                            <option value="qualified" {{ old('status_lead', $lead->status_lead) == 'qualified' ? 'selected' : '' }}>Qualified</option>
-                            <option value="gagal" {{ old('status_lead', $lead->status_lead) == 'gagal' ? 'selected' : '' }}>Gagal</option>
-                        </select>
-                        @error('status_lead')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
                     <div class="mb-3">
                         <label for="catatan" class="form-label">Catatan</label>
                         <textarea class="form-control @error('catatan') is-invalid @enderror"

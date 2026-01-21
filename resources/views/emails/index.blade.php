@@ -139,11 +139,20 @@
                         <td>{{ $email->pengirim->name }}</td>
                         <td>
                             @php
-                                $isRecent = $email->waktu_kirim->isToday();
+                                $statusClass = match($email->status_kirim) {
+                                    'sent' => 'bg-success',
+                                    'draft' => 'bg-warning',
+                                    'failed' => 'bg-danger',
+                                    default => 'bg-secondary'
+                                };
+                                $statusLabel = match($email->status_kirim) {
+                                    'sent' => 'Terkirim',
+                                    'draft' => 'Draft',
+                                    'failed' => 'Gagal',
+                                    default => 'Unknown'
+                                };
                             @endphp
-                            <span class="badge {{ $isRecent ? 'bg-success' : 'bg-secondary' }}">
-                                {{ $isRecent ? 'Baru' : 'Terkirim' }}
-                            </span>
+                            <span class="badge {{ $statusClass }}">{{ $statusLabel }}</span>
                         </td>
                         <td>
                             <div class="btn-group btn-group-sm">

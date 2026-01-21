@@ -14,7 +14,7 @@ class JadwalAktivitasController extends Controller
 
         // Filter by jenis_aktivitas
         if ($request->filled('jenis_aktivitas')) {
-            $query->where('jenis_aktivitas', $request->jenis_aktivitas);
+            $query->where('jenis_aktivitas', 'like', '%' . $request->jenis_aktivitas . '%');
         }
 
         // Filter by status_aktivitas
@@ -22,13 +22,20 @@ class JadwalAktivitasController extends Controller
             $query->where('status_aktivitas', $request->status_aktivitas);
         }
 
-        // Filter by date range
-        if ($request->filled('tanggal_dari')) {
-            $query->whereDate('tanggal_jadwal', '>=', $request->tanggal_dari);
-        }
+        // Filter by tanggal (single date)
+        $selectedDate = null;
+        if ($request->filled('tanggal')) {
+            $selectedDate = $request->tanggal;
+            $query->whereDate('tanggal_jadwal', $selectedDate);
+        } else {
+            // Filter by date range
+            if ($request->filled('tanggal_dari')) {
+                $query->whereDate('tanggal_jadwal', '>=', $request->tanggal_dari);
+            }
 
-        if ($request->filled('tanggal_sampai')) {
-            $query->whereDate('tanggal_jadwal', '<=', $request->tanggal_sampai);
+            if ($request->filled('tanggal_sampai')) {
+                $query->whereDate('tanggal_jadwal', '<=', $request->tanggal_sampai);
+            }
         }
 
         $aktivitas = $query->latest()->paginate(15);
@@ -39,12 +46,22 @@ class JadwalAktivitasController extends Controller
         $aktivitasSelesai = JadwalAktivitas::where('status_aktivitas', 'selesai')->count();
         $aktivitasHariIni = JadwalAktivitas::whereDate('tanggal_jadwal', now()->toDateString())->count();
 
+        // Get calendar data (all activities for month)
+        $currentMonth = $request->filled('bulan') ? \Carbon\Carbon::createFromFormat('Y-m', $request->bulan) : now();
+        $calendarData = JadwalAktivitas::whereBetween('tanggal_jadwal', [
+            $currentMonth->clone()->startOfMonth(),
+            $currentMonth->clone()->endOfMonth()
+        ])->get()->groupBy(fn($item) => $item->tanggal_jadwal->format('Y-m-d'));
+
         return view('aktivitas.index', compact(
             'aktivitas',
             'totalAktivitas',
             'aktivitasDirencanakan',
             'aktivitasSelesai',
-            'aktivitasHariIni'
+            'aktivitasHariIni',
+            'calendarData',
+            'currentMonth',
+            'selectedDate'
         ));
     }
 
@@ -59,7 +76,7 @@ class JadwalAktivitasController extends Controller
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
-            'jenis_aktivitas' => 'required|in:email,followup,konten',
+            'jenis_aktivitas' => 'required|string|max:100',
             'tanggal_jadwal' => 'required|date',
             'id_pelanggan' => 'nullable|exists:pelanggan,id',
         ]);
@@ -92,7 +109,7 @@ class JadwalAktivitasController extends Controller
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
-            'jenis_aktivitas' => 'required|in:email,followup,konten',
+            'jenis_aktivitas' => 'required|string|max:100',
             'tanggal_jadwal' => 'required|date',
             'status_aktivitas' => 'required|in:direncanakan,selesai',
             'id_pelanggan' => 'nullable|exists:pelanggan,id',

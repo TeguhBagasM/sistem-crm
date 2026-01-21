@@ -135,12 +135,19 @@
                         <td>{{ Str::limit($lead->alamat, 30) ?? '-' }}</td>
                         <td><span class="badge bg-secondary">{{ $lead->sumber }}</span></td>
                         <td>
-                            <select class="form-select form-select-sm status-select" data-lead-id="{{ $lead->id }}" onchange="updateLeadStatus(this)">
-                                <option value="baru" {{ $lead->status_lead == 'baru' ? 'selected' : '' }}>Baru</option>
-                                <option value="dihubungi" {{ $lead->status_lead == 'dihubungi' ? 'selected' : '' }}>Dihubungi</option>
-                                <option value="qualified" {{ $lead->status_lead == 'qualified' ? 'selected' : '' }}>Qualified</option>
-                                <option value="gagal" {{ $lead->status_lead == 'gagal' ? 'selected' : '' }}>Gagal</option>
-                            </select>
+                            @if($lead->pelanggan)
+                                <span class="badge bg-success">
+                                    <i class="bi bi-lock-fill"></i> {{ ucfirst($lead->status_lead) }}
+                                </span>
+                                <small class="d-block text-success mt-1">✓ Sudah di Contact</small>
+                            @else
+                                <select class="form-select form-select-sm status-select" data-lead-id="{{ $lead->id }}" onchange="updateLeadStatus(this)">
+                                    <option value="baru" {{ $lead->status_lead == 'baru' ? 'selected' : '' }}>Baru</option>
+                                    <option value="dihubungi" {{ $lead->status_lead == 'dihubungi' ? 'selected' : '' }}>Dihubungi</option>
+                                    <option value="qualified" {{ $lead->status_lead == 'qualified' ? 'selected' : '' }}>Qualified</option>
+                                    <option value="gagal" {{ $lead->status_lead == 'gagal' ? 'selected' : '' }}>Gagal</option>
+                                </select>
+                            @endif
                         </td>
                         <td>{{ $lead->pembuatData->name }}</td>
                         <td>
@@ -228,6 +235,13 @@ function updateLeadStatus(selectElement) {
 
                 selectElement.disabled = false;
                 return;
+            });
+        } else if (response.status === 403) {
+            return response.json().then(data => {
+                console.warn('Lead Locked:', data.message);
+                alert(data.message);
+                selectElement.value = previousStatus || '';
+                selectElement.disabled = false;
             });
         } else if (response.status === 422) {
             return response.json().then(data => {

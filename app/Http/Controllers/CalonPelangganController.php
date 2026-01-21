@@ -103,6 +103,15 @@ class CalonPelangganController extends Controller
     public function updateStatus(Request $request, CalonPelanggan $lead)
     {
         try {
+            // Cek apakah lead sudah dikonversi ke pelanggan
+            if ($lead->pelanggan) {
+                return response()->json([
+                    'message' => '❌ Tidak bisa mengubah status! Lead ini sudah dikonversi ke Contact Management (Pelanggan). Silakan ubah status di halaman Contact Management jika diperlukan.',
+                    'status' => 'error',
+                    'converted' => true
+                ], 403);
+            }
+
             $validated = $request->validate([
                 'status_lead' => 'required|in:baru,dihubungi,qualified,gagal',
             ]);

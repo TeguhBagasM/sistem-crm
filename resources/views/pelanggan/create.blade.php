@@ -110,7 +110,7 @@
         </div>
     </div>
 
-    <div class="col-md-4">
+    <div class="col-md-4 mt-4">
         <div class="card bg-light">
             <div class="card-body">
                 <h6 class="card-title"><i class="bi bi-info-circle"></i> Informasi</h6>

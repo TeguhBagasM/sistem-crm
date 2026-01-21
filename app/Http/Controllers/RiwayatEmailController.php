@@ -70,14 +70,47 @@ class RiwayatEmailController extends Controller
             'subjek' => 'required|string|max:255',
             'isi_pesan' => 'required|string',
             'waktu_kirim' => 'required|date',
+            'action' => 'required|in:save_only,send_email',
         ]);
 
         $validated['dikirim_oleh'] = auth()->id();
+        $validated['status_kirim'] = 'draft';
+
+        // If action is send_email, send it
+        if ($validated['action'] === 'send_email') {
+            $pelanggan = Pelanggan::findOrFail($validated['id_pelanggan']);
+
+            // Check if pelanggan has email
+            if (!$pelanggan->email) {
+                return back()->with('error', 'Pelanggan tidak memiliki alamat email!')
+                            ->withInput();
+            }
+
+            try {
+                // Send email
+                \Illuminate\Support\Facades\Mail::raw($validated['isi_pesan'], function ($message) use ($pelanggan, $validated) {
+                    $message->to($pelanggan->email)
+                            ->subject($validated['subjek']);
+                });
+
+                $validated['status_kirim'] = 'sent';
+                $validated['waktu_terkirim'] = now();
+                $message = 'Email berhasil dikirim!';
+            } catch (\Exception $e) {
+                $validated['status_kirim'] = 'failed';
+                $validated['error_message'] = $e->getMessage();
+                return back()->with('error', 'Gagal mengirim email: ' . $e->getMessage())
+                            ->withInput();
+            }
+        }
+
+        // Remove action field before saving to database
+        unset($validated['action']);
 
         RiwayatEmail::create($validated);
 
         return redirect()->route('emails.index')
-            ->with('success', 'Riwayat email berhasil ditambahkan!');
+            ->with('success', $validated['status_kirim'] === 'sent' ? 'Email berhasil dikirim dan dicatat!' : 'Riwayat email berhasil ditambahkan!');
     }
 
     public function show(RiwayatEmail $email)
@@ -99,12 +132,45 @@ class RiwayatEmailController extends Controller
             'subjek' => 'required|string|max:255',
             'isi_pesan' => 'required|string',
             'waktu_kirim' => 'required|date',
+            'action' => 'required|in:save_only,send_email',
         ]);
+
+        // Remove action field from validated (don't save to DB)
+        $action = $validated['action'];
+        unset($validated['action']);
+
+        // If action is send_email, send it
+        if ($action === 'send_email') {
+            $pelanggan = Pelanggan::findOrFail($validated['id_pelanggan']);
+
+            // Check if pelanggan has email
+            if (!$pelanggan->email) {
+                return back()->with('error', 'Pelanggan tidak memiliki alamat email!')
+                            ->withInput();
+            }
+
+            try {
+                // Send email
+                \Illuminate\Support\Facades\Mail::raw($validated['isi_pesan'], function ($message) use ($pelanggan, $validated) {
+                    $message->to($pelanggan->email)
+                            ->subject($validated['subjek']);
+                });
+
+                $validated['status_kirim'] = 'sent';
+                $validated['waktu_terkirim'] = now();
+                $message = 'Email berhasil dikirim dan data diperbarui!';
+            } catch (\Exception $e) {
+                $validated['status_kirim'] = 'failed';
+                $validated['error_message'] = $e->getMessage();
+                return back()->with('error', 'Gagal mengirim email: ' . $e->getMessage())
+                            ->withInput();
+            }
+        }
 
         $email->update($validated);
 
-        return redirect()->route('emails.index')
-            ->with('success', 'Riwayat email berhasil diperbarui!');
+        return redirect()->route('emails.index', $email)
+            ->with('success', $action === 'send_email' ? 'Email berhasil dikirim dan data diperbarui!' : 'Riwayat email berhasil diperbarui!');
     }
 
     public function destroy(RiwayatEmail $email)

@@ -82,9 +82,36 @@
                         @enderror
                     </div>
 
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Tindakan <span class="text-danger">*</span>
+                        </label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="action" id="action-save"
+                                   value="save_only" {{ old('action', 'save_only') == 'save_only' ? 'checked' : '' }} required>
+                            <label class="form-check-label" for="action-save">
+                                <i class="bi bi-database"></i> <strong>Simpan Perubahan Saja</strong>
+                                <small class="d-block text-muted">Hanya update data, tidak mengirim email</small>
+                            </label>
+                        </div>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="radio" name="action" id="action-send"
+                                   value="send_email" {{ old('action') == 'send_email' ? 'checked' : '' }} required>
+                            <label class="form-check-label" for="action-send">
+                                <i class="bi bi-send"></i> <strong>Update & Kirim Email</strong>
+                                <small class="d-block text-muted">Update data dan langsung mengirim ke email pelanggan</small>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="email-info-alert" class="alert alert-info d-none" role="alert">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Info:</strong> Email akan dikirim ke <span id="customer-email-display" class="fw-bold">-</span>
+                    </div>
+
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-save"></i> Update Email
+                            <i class="bi bi-save"></i> Update & Lanjutkan
                         </button>
                         <a href="{{ route('emails.show', $email) }}" class="btn btn-secondary">
                             <i class="bi bi-x-circle"></i> Batal
@@ -121,6 +148,37 @@ const charCount = document.getElementById('char-count');
 isiPesan.addEventListener('input', function() {
     charCount.textContent = this.value.length;
 });
+
+// Dynamic email display when customer selected
+const pelangganSelect = document.getElementById('id_pelanggan');
+const emailDisplay = document.getElementById('customer-email-display');
+const emailAlert = document.getElementById('email-info-alert');
+const actionSend = document.getElementById('action-send');
+
+pelangganSelect.addEventListener('change', function() {
+    const selected = this.options[this.selectedIndex];
+    const email = selected.getAttribute('data-email');
+    const nama = selected.getAttribute('data-nama');
+
+    if (email) {
+        emailDisplay.textContent = email;
+        emailAlert.classList.remove('d-none');
+    } else {
+        emailAlert.classList.add('d-none');
+        actionSend.checked = false;
+        document.getElementById('action-save').checked = true;
+    }
+});
+
+// Initialize on page load
+if (pelangganSelect.value) {
+    const selected = pelangganSelect.options[pelangganSelect.selectedIndex];
+    const email = selected.getAttribute('data-email');
+    if (email) {
+        emailDisplay.textContent = email;
+        emailAlert.classList.remove('d-none');
+    }
+}
 </script>
 @endpush
 @endsection

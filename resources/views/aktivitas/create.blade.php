@@ -41,19 +41,11 @@
                                 <label for="jenis_aktivitas" class="form-label">
                                     Jenis Aktivitas <span class="text-danger">*</span>
                                 </label>
-                                <select class="form-select @error('jenis_aktivitas') is-invalid @enderror"
-                                        id="jenis_aktivitas" name="jenis_aktivitas" required>
-                                    <option value="">Pilih Jenis</option>
-                                    <option value="email" {{ old('jenis_aktivitas') == 'email' ? 'selected' : '' }}>
-                                        📧 Email Campaign
-                                    </option>
-                                    <option value="followup" {{ old('jenis_aktivitas') == 'followup' ? 'selected' : '' }}>
-                                        📞 Follow-up Client
-                                    </option>
-                                    <option value="konten" {{ old('jenis_aktivitas') == 'konten' ? 'selected' : '' }}>
-                                        📝 Konten Marketing
-                                    </option>
-                                </select>
+                                <input type="text" class="form-control @error('jenis_aktivitas') is-invalid @enderror"
+                                       id="jenis_aktivitas" name="jenis_aktivitas"
+                                       value="{{ old('jenis_aktivitas') }}"
+                                       placeholder="Contoh: Email Campaign, Follow-up, Meeting, dll" required>
+                                <small class="form-text text-muted">Isi dengan jenis aktivitas yang ingin Anda lakukan</small>
                                 @error('jenis_aktivitas')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
