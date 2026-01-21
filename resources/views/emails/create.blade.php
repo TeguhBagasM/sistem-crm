@@ -87,9 +87,6 @@
                         <button type="submit" class="btn btn-success">
                             <i class="bi bi-save"></i> Simpan Riwayat
                         </button>
-                        <button type="button" class="btn btn-primary" id="sendEmailBtn" disabled>
-                            <i class="bi bi-envelope"></i> Kirim Email Sekarang
-                        </button>
                         <a href="{{ route('emails.index') }}" class="btn btn-secondary">
                             <i class="bi bi-x-circle"></i> Batal
                         </a>
@@ -102,26 +99,8 @@
     <div class="col-md-4">
         <div class="card bg-light mb-3">
             <div class="card-body">
-                <h6 class="card-title"><i class="bi bi-info-circle"></i> Cara Kerja</h6>
-                <ol class="small mb-0">
-                    <li>Pilih pelanggan tujuan</li>
-                    <li>Isi subjek dan pesan email</li>
-                    <li>Klik <strong>"Kirim Email Sekarang"</strong> untuk membuka email client</li>
-                    <li>Email akan terbuka dengan data terisi otomatis</li>
-                    <li>Kirim dari email client Anda</li>
-                    <li>Kembali ke form dan klik <strong>"Simpan Riwayat"</strong></li>
-                </ol>
-            </div>
-        </div>
-
-        <div class="card bg-warning">
-            <div class="card-body">
-                <h6 class="card-title"><i class="bi bi-lightbulb"></i> Tips</h6>
-                <ul class="small mb-0">
-                    <li>Tombol "Kirim Email" akan aktif setelah data terisi</li>
-                    <li>Email akan terbuka di client default (Gmail, Outlook, dll)</li>
-                    <li>Simpan riwayat untuk tracking komunikasi</li>
-                </ul>
+                <h6 class="card-title"><i class="bi bi-info-circle"></i> Informasi</h6>
+                <p class="small mb-0">Gunakan form di samping untuk mencatat riwayat email pelanggan Anda. Data tersimpan akan membantu dalam tracking komunikasi dengan pelanggan.</p>
             </div>
         </div>
     </div>
@@ -134,61 +113,6 @@ const isiPesan = document.getElementById('isi_pesan');
 const charCount = document.getElementById('char-count');
 isiPesan.addEventListener('input', function() {
     charCount.textContent = this.value.length;
-});
-
-// Show customer email when selected
-const pelangganSelect = document.getElementById('id_pelanggan');
-const customerEmailDiv = document.getElementById('customer-email');
-const sendEmailBtn = document.getElementById('sendEmailBtn');
-const subjekInput = document.getElementById('subjek');
-
-pelangganSelect.addEventListener('change', function() {
-    const selected = this.options[this.selectedIndex];
-    const email = selected.dataset.email;
-
-    if (email && email !== 'null') {
-        customerEmailDiv.textContent = '📧 ' + email;
-        customerEmailDiv.classList.remove('text-danger');
-        customerEmailDiv.classList.add('text-success');
-        checkSendButtonState();
-    } else {
-        customerEmailDiv.textContent = '⚠️ Pelanggan ini tidak memiliki email';
-        customerEmailDiv.classList.remove('text-success');
-        customerEmailDiv.classList.add('text-danger');
-        sendEmailBtn.disabled = true;
-    }
-});
-
-// Check if send email button should be enabled
-function checkSendButtonState() {
-    const selected = pelangganSelect.options[pelangganSelect.selectedIndex];
-    const email = selected.dataset.email;
-    const subjek = subjekInput.value.trim();
-    const isiPesanValue = isiPesan.value.trim();
-
-    if (email && email !== 'null' && subjek && isiPesanValue) {
-        sendEmailBtn.disabled = false;
-    } else {
-        sendEmailBtn.disabled = true;
-    }
-}
-
-// Enable/disable send button on input
-subjekInput.addEventListener('input', checkSendButtonState);
-isiPesan.addEventListener('input', checkSendButtonState);
-
-// Send Email after save
-sendEmailBtn.addEventListener('click', function() {
-    // First submit the form to save email record
-    document.getElementById('emailForm').addEventListener('submit', function(e) {
-        // Form will be saved first
-    });
-
-    // Submit form
-    const form = document.getElementById('emailForm');
-    form.submit();
-
-    alert('Email sedang disiapkan untuk dikirim...');
 });
 </script>
 @endpush

@@ -4,10 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\RiwayatEmail;
 use App\Models\Pelanggan;
-use App\Mail\SendEmailToPelanggan;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Log;
 
 class RiwayatEmailController extends Controller
 {
@@ -116,50 +113,5 @@ class RiwayatEmailController extends Controller
 
         return redirect()->route('emails.index')
             ->with('success', 'Riwayat email berhasil dihapus!');
-    }
-
-    /**
-     * Send email to pelanggan
-     */
-    public function send(Request $request, RiwayatEmail $email)
-    {
-        try {
-            // Validasi email pelanggan
-            if (!$email->pelanggan->email) {
-                return back()->with('error', 'Pelanggan tidak memiliki email!');
-            }
-
-            // Send email
-            Mail::to($email->pelanggan->email)
-                ->send(new SendEmailToPelanggan($email));
-
-            // Update status email
-            $email->update([
-                'status_kirim' => 'sent',
-                'waktu_terkirim' => now(),
-            ]);
-
-            Log::info("Email sent successfully", [
-                'email_id' => $email->id,
-                'to' => $email->pelanggan->email,
-                'subject' => $email->subjek,
-                'sent_by' => auth()->user()->name
-            ]);
-
-            return back()->with('success', '✓ Email berhasil dikirim ke ' . $email->pelanggan->email . '!');
-        } catch (\Exception $e) {
-            // Update status email to failed
-            $email->update([
-                'status_kirim' => 'failed',
-                'error_message' => $e->getMessage(),
-            ]);
-
-            Log::error("Error sending email", [
-                'email_id' => $email->id,
-                'error' => $e->getMessage()
-            ]);
-
-            return back()->with('error', '✗ Gagal mengirim email: ' . $e->getMessage());
-        }
     }
 }

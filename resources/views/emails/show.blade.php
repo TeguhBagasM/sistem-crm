@@ -20,15 +20,6 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="bi bi-envelope"></i> {{ $email->subjek }}</h5>
                     <div>
-                        @if($email->pelanggan->email)
-                        <form action="{{ route('emails.send', $email) }}" method="POST" class="d-inline"
-                              onsubmit="return confirm('Kirim email ke ' + '{{ $email->pelanggan->email }}' + '?')">
-                            @csrf
-                            <button type="submit" class="btn btn-sm btn-success">
-                                <i class="bi bi-send"></i> Kirim Email
-                            </button>
-                        </form>
-                        @endif
                         <a href="{{ route('emails.edit', $email) }}" class="btn btn-sm btn-warning">
                             <i class="bi bi-pencil"></i> Edit
                         </a>

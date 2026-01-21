@@ -86,15 +86,6 @@
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-save"></i> Update Email
                         </button>
-                        @if($email->pelanggan->email)
-                        <form action="{{ route('emails.send', $email) }}" method="POST" class="d-inline"
-                              onsubmit="return confirm('Kirim email ke ' + '{{ $email->pelanggan->email }}' + '?')">
-                            @csrf
-                            <button type="submit" class="btn btn-success">
-                                <i class="bi bi-send"></i> Kirim Email
-                            </button>
-                        </form>
-                        @endif
                         <a href="{{ route('emails.show', $email) }}" class="btn btn-secondary">
                             <i class="bi bi-x-circle"></i> Batal
                         </a>
