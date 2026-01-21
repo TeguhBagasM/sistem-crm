@@ -17,6 +17,7 @@ class Pelanggan extends Model
         'email',
         'no_telepon',
         'perusahaan',
+        'alamat',
         'status_pelanggan',
         'pemilik_data',
     ];

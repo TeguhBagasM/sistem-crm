@@ -49,7 +49,8 @@ class CalonPelangganController extends Controller
             'nama' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
             'no_telepon' => 'required|string|max:20',
-            'sumber' => 'required|in:IG,Website,WA',
+            'sumber' => 'required|string|max:100',
+            'alamat' => 'nullable|string',
             'catatan' => 'nullable|string',
         ]);
 
@@ -79,7 +80,8 @@ class CalonPelangganController extends Controller
             'nama' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
             'no_telepon' => 'required|string|max:20',
-            'sumber' => 'required|in:IG,Website,WA',
+            'sumber' => 'required|string|max:100',
+            'alamat' => 'nullable|string',
             'status_lead' => 'required|in:baru,dihubungi,qualified,gagal',
             'catatan' => 'nullable|string',
         ]);
@@ -109,12 +111,23 @@ class CalonPelangganController extends Controller
 
             // Return JSON response untuk AJAX request
             if ($request->wantsJson() || $request->isXmlHttpRequest()) {
+                $baruCount = CalonPelanggan::where('status_lead', 'baru')->count();
+                $dihubungiCount = CalonPelanggan::where('status_lead', 'dihubungi')->count();
+                $qualifiedCount = CalonPelanggan::where('status_lead', 'qualified')->count();
+                $gagalCount = CalonPelanggan::where('status_lead', 'gagal')->count();
+
                 return response()->json([
                     'message' => 'Status lead berhasil diperbarui!',
                     'status' => 'success',
                     'data' => [
                         'id' => $lead->id,
                         'status_lead' => $lead->status_lead
+                    ],
+                    'stats' => [
+                        'baru' => $baruCount,
+                        'dihubungi' => $dihubungiCount,
+                        'qualified' => $qualifiedCount,
+                        'gagal' => $gagalCount
                     ]
                 ], 200);
             }

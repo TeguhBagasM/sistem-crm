@@ -59,6 +59,7 @@ class PelangganController extends Controller
             'email' => 'nullable|email|max:255',
             'no_telepon' => 'required|string|max:20',
             'perusahaan' => 'nullable|string|max:255',
+            'alamat' => 'nullable|string',
             'status_pelanggan' => 'required|in:aktif,tidak_aktif',
         ]);
 
@@ -94,6 +95,7 @@ class PelangganController extends Controller
             'email' => 'nullable|email|max:255',
             'no_telepon' => 'required|string|max:20',
             'perusahaan' => 'nullable|string|max:255',
+            'alamat' => 'nullable|string',
             'status_pelanggan' => 'required|in:aktif,tidak_aktif',
         ]);
 

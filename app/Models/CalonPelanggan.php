@@ -16,6 +16,7 @@ class CalonPelanggan extends Model
         'email',
         'no_telepon',
         'sumber',
+        'alamat',
         'status_lead',
         'catatan',
         'dibuat_oleh',
