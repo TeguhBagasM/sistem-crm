@@ -30,7 +30,8 @@
                             <option value="{{ $lead->id }}"
                                     data-nama="{{ $lead->nama }}"
                                     data-email="{{ $lead->email }}"
-                                    data-telepon="{{ $lead->no_telepon }}">
+                                    data-telepon="{{ $lead->no_telepon }}"
+                                    data-alamat="{{ $lead->alamat }}">
                                 {{ $lead->nama }} - {{ $lead->no_telepon }}
                             </option>
                             @endforeach
@@ -78,6 +79,13 @@
                     </div>
 
                     <div class="mb-3">
+                        <label for="alamat" class="form-label">Alamat</label>
+                        <textarea class="form-control @error('alamat') is-invalid @enderror"
+                                  id="alamat" name="alamat" rows="3">{{ old('alamat') }}</textarea>
+                        @error('alamat')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
                         <label for="status_pelanggan" class="form-label">Status Pelanggan <span class="text-danger">*</span></label>
                         <select class="form-select @error('status_pelanggan') is-invalid @enderror"
                                 id="status_pelanggan" name="status_pelanggan" required>
@@ -125,6 +133,7 @@ document.getElementById('id_calon_pelanggan').addEventListener('change', functio
         document.getElementById('nama').value = selected.dataset.nama || '';
         document.getElementById('email').value = selected.dataset.email || '';
         document.getElementById('no_telepon').value = selected.dataset.telepon || '';
+        document.getElementById('alamat').value = selected.dataset.alamat || '';
     }
 });
 </script>

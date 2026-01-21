@@ -65,6 +65,15 @@
                             </p>
                         </div>
                     </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <p class="mb-0">
+                                <strong><i class="bi bi-geo-alt"></i> Alamat:</strong><br>
+                                <span class="text-primary">{{ $pelanggan->alamat ?? '-' }}</span>
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Email History Section -->

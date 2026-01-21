@@ -16,7 +16,7 @@
 <!-- Statistics Cards -->
 <div class="row mb-4">
     <div class="col-md-3">
-        <div class="card text-white bg-primary">
+        <div class="card text-white bg-primary" data-stat="total">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
@@ -29,7 +29,7 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-white bg-info">
+        <div class="card text-white bg-info" data-stat="qualified">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
@@ -42,7 +42,7 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-white bg-warning">
+        <div class="card text-white bg-warning" data-stat="dihubungi">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
@@ -55,7 +55,7 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-white bg-danger">
+        <div class="card text-white bg-danger" data-stat="gagal">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
@@ -118,6 +118,7 @@
                         <th>Nama</th>
                         <th>Email</th>
                         <th>No. Telepon</th>
+                        <th>Alamat</th>
                         <th>Sumber</th>
                         <th>Status</th>
                         <th>Dibuat Oleh</th>
@@ -131,6 +132,7 @@
                         <td><strong>{{ $lead->nama }}</strong></td>
                         <td>{{ $lead->email ?? '-' }}</td>
                         <td>{{ $lead->no_telepon }}</td>
+                        <td>{{ Str::limit($lead->alamat, 30) ?? '-' }}</td>
                         <td><span class="badge bg-secondary">{{ $lead->sumber }}</span></td>
                         <td>
                             <select class="form-select form-select-sm status-select" data-lead-id="{{ $lead->id }}" onchange="updateLeadStatus(this)">
@@ -162,7 +164,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="text-center text-muted">
+                        <td colspan="9" class="text-center text-muted">
                             <i class="bi bi-inbox" style="font-size: 3rem;"></i>
                             <p class="mt-2">Belum ada data lead</p>
                         </td>
@@ -218,6 +220,12 @@ function updateLeadStatus(selectElement) {
             return response.json().then(data => {
                 selectElement.dataset.previousValue = newStatus;
                 console.log('✓ Status berhasil diubah menjadi: ' + newStatus);
+
+                // Update statistics cards realtime
+                if (data.stats) {
+                    updateStatisticsCards(data.stats);
+                }
+
                 selectElement.disabled = false;
                 return;
             });
@@ -249,6 +257,36 @@ function updateLeadStatus(selectElement) {
         selectElement.value = previousStatus || '';
         selectElement.disabled = false;
     });
+}
+
+// Update statistics cards realtime
+function updateStatisticsCards(stats) {
+    // Update qualified card
+    const qualifiedCard = document.querySelector('.card[data-stat="qualified"]');
+    if (qualifiedCard) {
+        const qualifiedValue = qualifiedCard.querySelector('h4');
+        if (qualifiedValue) {
+            qualifiedValue.textContent = stats.qualified;
+        }
+    }
+
+    // Update dihubungi card
+    const dihubungiCard = document.querySelector('.card[data-stat="dihubungi"]');
+    if (dihubungiCard) {
+        const dihubungiValue = dihubungiCard.querySelector('h4');
+        if (dihubungiValue) {
+            dihubungiValue.textContent = stats.dihubungi;
+        }
+    }
+
+    // Update gagal card
+    const gagalCard = document.querySelector('.card[data-stat="gagal"]');
+    if (gagalCard) {
+        const gagalValue = gagalCard.querySelector('h4');
+        if (gagalValue) {
+            gagalValue.textContent = stats.gagal;
+        }
+    }
 }
 
 // Store initial status values

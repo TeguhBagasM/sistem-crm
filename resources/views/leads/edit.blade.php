@@ -50,13 +50,18 @@
 
                     <div class="mb-3">
                         <label for="sumber" class="form-label">Sumber <span class="text-danger">*</span></label>
-                        <select class="form-select @error('sumber') is-invalid @enderror" id="sumber" name="sumber" required>
-                            <option value="">Pilih Sumber</option>
-                            <option value="IG" {{ old('sumber', $lead->sumber) == 'IG' ? 'selected' : '' }}>Instagram</option>
-                            <option value="Website" {{ old('sumber', $lead->sumber) == 'Website' ? 'selected' : '' }}>Website</option>
-                            <option value="WA" {{ old('sumber', $lead->sumber) == 'WA' ? 'selected' : '' }}>WhatsApp</option>
-                        </select>
+                        <input type="text" class="form-control @error('sumber') is-invalid @enderror"
+                               id="sumber" name="sumber" value="{{ old('sumber', $lead->sumber) }}" placeholder="Contoh: Instagram, Website, WhatsApp" required>
                         @error('sumber')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="alamat" class="form-label">Alamat</label>
+                        <textarea class="form-control @error('alamat') is-invalid @enderror"
+                                  id="alamat" name="alamat" rows="3">{{ old('alamat', $lead->alamat) }}</textarea>
+                        @error('alamat')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>

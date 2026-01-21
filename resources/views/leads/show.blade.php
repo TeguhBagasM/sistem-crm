@@ -65,6 +65,17 @@
                             </p>
                         </div>
                     </div>
+
+                    @if($lead->alamat)
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <p class="mb-0">
+                                <strong><i class="bi bi-geo-alt"></i> Alamat:</strong><br>
+                                <span class="text-primary">{{ $lead->alamat }}</span>
+                            </p>
+                        </div>
+                    </div>
+                    @endif
                 </div>
 
                 @if($lead->catatan)
