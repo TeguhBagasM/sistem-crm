@@ -12,7 +12,7 @@ class UserSeeder extends Seeder
     {
         $users = [
             [
-                'name' => 'Admin System',
+                'name' => 'Admin',
                 'email' => 'admin@crm.com',
                 'password' => Hash::make('password'),
                 'role' => 'admin',
