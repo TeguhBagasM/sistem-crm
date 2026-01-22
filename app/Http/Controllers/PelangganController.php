@@ -59,11 +59,16 @@ class PelangganController extends Controller
             'email' => 'nullable|email|max:255',
             'no_telepon' => 'required|string|max:20',
             'perusahaan' => 'nullable|string|max:255',
+            'website' => 'nullable|url',
             'alamat' => 'nullable|string',
+            'catatan_internal' => 'nullable|string',
             'status_pelanggan' => 'required|in:aktif,tidak_aktif',
+            'kategori_pelanggan' => 'nullable|string|max:255',
+            'rating_pelanggan' => 'required|in:VIP,High,Medium,Low',
         ]);
 
         $validated['pemilik_data'] = auth()->id();
+        $validated['kontak_terakhir'] = now();
 
         $pelanggan = Pelanggan::create($validated);
 
@@ -73,7 +78,7 @@ class PelangganController extends Controller
                 ->update(['status_lead' => 'dikonversi']);
         }
 
-        return redirect()->route('pelanggan.index')
+        return redirect()->route('pelanggan.show', $pelanggan)
             ->with('success', 'Pelanggan berhasil ditambahkan!');
     }
 
@@ -95,13 +100,17 @@ class PelangganController extends Controller
             'email' => 'nullable|email|max:255',
             'no_telepon' => 'required|string|max:20',
             'perusahaan' => 'nullable|string|max:255',
+            'website' => 'nullable|url',
             'alamat' => 'nullable|string',
+            'catatan_internal' => 'nullable|string',
             'status_pelanggan' => 'required|in:aktif,tidak_aktif',
+            'kategori_pelanggan' => 'required|string|max:255',
+            'rating_pelanggan' => 'required|in:VIP,High,Medium,Low',
         ]);
 
         $pelanggan->update($validated);
 
-        return redirect()->route('pelanggan.index')
+        return redirect()->route('pelanggan.show', $pelanggan)
             ->with('success', 'Data pelanggan berhasil diperbarui!');
     }
 

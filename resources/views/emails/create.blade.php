@@ -124,12 +124,12 @@
 
                     <div class="mb-3">
                         <label class="form-label">
-                            <i class="bi bi-gear"></i> Aksi <span class="text-danger">*</span>
+                            <i class="bi bi-gear"></i> Aksi (pilih salah satu)<span class="text-danger">*</span>
                         </label>
                         <div class="btn-group w-100" role="group">
                             <input type="radio" class="btn-check" name="action" id="action-save" value="save_only" checked>
                             <label class="btn btn-outline-primary" for="action-save">
-                                <i class="bi bi-save"></i> Simpan Saja
+                                <i class="bi bi-save"></i> Simpan Sebagai draft
                             </label>
 
                             <input type="radio" class="btn-check" name="action" id="action-send" value="send_email">

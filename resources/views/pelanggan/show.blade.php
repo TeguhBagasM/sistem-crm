@@ -35,6 +35,24 @@
                 </div>
             </div>
             <div class="card-body">
+                <!-- Quick Action Buttons -->
+                <div class="mb-4 d-flex gap-2 flex-wrap">
+                    @if($pelanggan->no_telepon)
+                    <a href="{{ $pelanggan->getWhatsAppLink() }}" target="_blank" class="btn btn-success btn-sm">
+                        <i class="bi bi-whatsapp"></i> WhatsApp
+                    </a>
+                    <a href="{{ $pelanggan->getCallLink() }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-telephone"></i> Telepon
+                    </a>
+                    @endif
+                    @if($pelanggan->email)
+                    <a href="{{ $pelanggan->getEmailLink() }}" class="btn btn-warning btn-sm">
+                        <i class="bi bi-envelope"></i> Email
+                    </a>
+                    @endif
+                </div>
+
+                <!-- Customer Info -->
                 <div class="customer-info p-3 bg-light rounded mb-4">
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -66,6 +84,17 @@
                         </div>
                     </div>
 
+                    @if($pelanggan->website)
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <p class="mb-0">
+                                <strong><i class="bi bi-globe"></i> Website:</strong><br>
+                                <a href="{{ $pelanggan->website }}" target="_blank" class="text-primary">{{ $pelanggan->website }}</a>
+                            </p>
+                        </div>
+                    </div>
+                    @endif
+
                     <div class="row mb-3">
                         <div class="col-md-12">
                             <p class="mb-0">
@@ -74,7 +103,46 @@
                             </p>
                         </div>
                     </div>
+
+                    <!-- Kategorisasi Info -->
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <small><strong>Kategori:</strong></small><br>
+                            <small class="badge bg-info">{{ ucfirst($pelanggan->kategori_pelanggan) }}</small>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <small><strong>Rating:</strong></small><br>
+                            <small class="badge {{ $pelanggan->getRatingBadgeClass() }}">
+                                @if($pelanggan->rating_pelanggan === 'VIP') ⭐ @endif {{ $pelanggan->rating_pelanggan }}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <small><strong>Sumber:</strong></small><br>
+                            <small class="badge bg-secondary">{{ ucfirst(str_replace('_', ' ', $pelanggan->sumber_pelanggan)) }}</small>
+                        </div>
+                        @if($pelanggan->kontak_terakhir)
+                        <div class="col-md-6 mb-2">
+                            <small><strong>Kontak Terakhir:</strong></small><br>
+                            <small>{{ $pelanggan->kontak_terakhir->format('d M Y') }}</small>
+                        </div>
+                        @endif
+                    </div>
                 </div>
+
+                <!-- Internal Notes -->
+                @if($pelanggan->catatan_internal)
+                <div class="card mb-4 border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0"><i class="bi bi-chat-left-text"></i> Catatan Internal</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0">{{ $pelanggan->catatan_internal }}</p>
+                    </div>
+                </div>
+                @endif
 
                 <!-- Email History Section -->
                 @if($pelanggan->riwayatEmail->count() > 0)
@@ -170,7 +238,19 @@
                         </td>
                     </tr>
                     <tr>
-                        <td><strong>Pemilik Data</strong></td>
+                        <td><strong>Rating</strong></td>
+                        <td>
+                            <span class="badge {{ $pelanggan->getRatingBadgeClass() }}">
+                                @if($pelanggan->rating_pelanggan === 'VIP') ⭐ @endif {{ $pelanggan->rating_pelanggan }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Kategori</strong></td>
+                        <td><small>{{ ucfirst($pelanggan->kategori_pelanggan) }}</small></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Pemilik</strong></td>
                         <td>{{ $pelanggan->pemilik->name }}</td>
                     </tr>
                     <tr>

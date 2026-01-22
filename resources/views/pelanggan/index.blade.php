@@ -91,9 +91,9 @@
                 <select class="form-select" id="pemilik" name="pemilik">
                     <option value="">Semua User</option>
                     @foreach($userList ?? [] as $user)
-                    <option value="{{ $user->id }}" {{ request('pemilik') == $user->id ? 'selected' : '' }}>
-                        {{ $user->name }}
-                    </option>
+                        <option value="{{ $user->id }}" {{ request('pemilik') == $user->id ? 'selected' : '' }}>
+                            {{ $user->name }}
+                        </option>
                     @endforeach
                 </select>
             </div>
@@ -116,11 +116,11 @@
                     <tr>
                         <th>#</th>
                         <th>Nama</th>
-                        <th>Email</th>
+                        <th>Rating</th>
                         <th>No. Telepon</th>
                         <th>Perusahaan</th>
                         <th>Status</th>
-                        <th>Pemilik Data</th>
+                        <th>Kontak Cepat</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -134,15 +134,30 @@
                             <br><small class="text-muted"><i class="bi bi-arrow-return-left"></i> Dari Lead</small>
                             @endif
                         </td>
-                        <td>{{ $customer->email ?? '-' }}</td>
+                        <td>
+                            <span class="badge {{ $customer->getRatingBadgeClass() }}">
+                                @if($customer->rating_pelanggan === 'VIP') ⭐ @endif {{ $customer->rating_pelanggan }}
+                            </span>
+                        </td>
                         <td>{{ $customer->no_telepon }}</td>
-                        <td>{{ $customer->perusahaan ?? '-' }}</td>
+                        <td><small>{{ $customer->perusahaan ?? '-' }}</small></td>
                         <td>
                             <span class="badge {{ $customer->status_pelanggan == 'aktif' ? 'bg-success' : 'bg-danger' }}">
                                 {{ ucfirst(str_replace('_', ' ', $customer->status_pelanggan)) }}
                             </span>
                         </td>
-                        <td><small>{{ $customer->pemilik->name }}</small></td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                @if($customer->no_telepon)
+                                <a href="{{ $customer->getWhatsAppLink() }}" target="_blank" class="btn btn-success" title="WhatsApp">
+                                    <i class="bi bi-whatsapp"></i>
+                                </a>
+                                <a href="{{ $customer->getCallLink() }}" class="btn btn-primary" title="Telepon">
+                                    <i class="bi bi-telephone"></i>
+                                </a>
+                                @endif
+                            </div>
+                        </td>
                         <td>
                             <div class="btn-group btn-group-sm">
                                 <a href="{{ route('pelanggan.show', $customer) }}" class="btn btn-info" title="Detail">
@@ -155,7 +170,7 @@
                                       onsubmit="return confirm('Yakin ingin menghapus pelanggan ini?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-danger" title="Hapus">
+                                    <button type="submit" class="btn btn-danger btn-sm" title="Hapus">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
