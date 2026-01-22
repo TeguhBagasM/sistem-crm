@@ -85,6 +85,7 @@
 
                     <hr>
 
+                    <!-- Subjek Email -->
                     <div class="mb-3">
                         <label for="subjek" class="form-label">
                             <i class="bi bi-tag"></i> Subjek Email <span class="text-danger">*</span>
@@ -97,12 +98,13 @@
                         @enderror
                     </div>
 
+                    <!-- Isi Pesan -->
                     <div class="mb-3">
                         <label for="isi_pesan" class="form-label">
                             <i class="bi bi-pencil"></i> Isi Pesan <span class="text-danger">*</span>
                         </label>
                         <textarea class="form-control @error('isi_pesan') is-invalid @enderror"
-                                  id="isi_pesan" name="isi_pesan" rows="8"
+                                  id="isi_pesan" name="isi_pesan" rows="10"
                                   placeholder="Tulis isi email di sini..." required>{{ old('isi_pesan', $email->isi_pesan) }}</textarea>
                         @error('isi_pesan')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -110,6 +112,7 @@
                         <small class="text-muted">Karakter: <span id="char-count">{{ strlen($email->isi_pesan) }}</span></small>
                     </div>
 
+                    <!-- Waktu Kirim -->
                     <div class="mb-3">
                         <label for="waktu_kirim" class="form-label">
                             <i class="bi bi-calendar-event"></i> Waktu Kirim <span class="text-danger">*</span>
@@ -122,27 +125,35 @@
                         @enderror
                     </div>
 
+                    <!-- Aksi -->
                     <div class="mb-3">
                         <label class="form-label">
                             <i class="bi bi-gear"></i> Aksi <span class="text-danger">*</span>
                         </label>
-                        <div class="btn-group w-100" role="group">
-                            <input type="radio" class="btn-check" name="action" id="action-save" value="save_only" checked>
-                            <label class="btn btn-outline-primary" for="action-save">
-                                <i class="bi bi-save"></i> Simpan Saja
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="action" id="action-save"
+                                   value="save_only" {{ old('action', 'save_only') == 'save_only' ? 'checked' : '' }} required>
+                            <label class="form-check-label" for="action-save">
+                                <i class="bi bi-save"></i> <strong>Simpan Saja</strong>
+                                <small class="d-block text-muted">Hanya update data email</small>
                             </label>
-
-                            <input type="radio" class="btn-check" name="action" id="action-send" value="send_email">
-                            <label class="btn btn-outline-success" for="action-send">
-                                <i class="bi bi-send"></i> Kirim Sekarang
+                        </div>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="radio" name="action" id="action-send"
+                                   value="send_email" {{ old('action') == 'send_email' ? 'checked' : '' }} required>
+                            <label class="form-check-label" for="action-send">
+                                <i class="bi bi-send"></i> <strong>Kirim Sekarang</strong>
+                                <small class="d-block text-muted">Update dan langsung kirim email ke penerima</small>
                             </label>
                         </div>
                     </div>
 
+                    <!-- Info Alert -->
                     <div id="email-info-alert" class="alert alert-info d-none" role="alert">
                         <i class="bi bi-info-circle"></i> Email Penerima: <strong id="customer-email-display"></strong>
                     </div>
 
+                    <!-- Form Buttons -->
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-check-circle"></i> Proses
@@ -156,19 +167,25 @@
         </div>
     </div>
 
+    <!-- Sidebar Info -->
     <div class="col-md-4">
         <div class="card bg-light">
             <div class="card-body">
                 <h6 class="card-title"><i class="bi bi-info-circle"></i> Informasi</h6>
-                <p class="small mb-2">
-                    <strong>Dicatat:</strong> {{ $email->created_at->format('d M Y H:i') }}
-                </p>
-                <p class="small mb-2">
-                    <strong>Terakhir Update:</strong> {{ $email->updated_at->format('d M Y H:i') }}
-                </p>
-                <p class="small mb-0">
-                    <strong>Dikirim Oleh:</strong> {{ $email->pengirim->name }}
-                </p>
+                <table class="table table-sm">
+                    <tr>
+                        <td><strong>Dicatat:</strong></td>
+                        <td>{{ $email->created_at->format('d M Y H:i') }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Update Terakhir:</strong></td>
+                        <td>{{ $email->updated_at->format('d M Y H:i') }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Dikirim Oleh:</strong></td>
+                        <td>{{ $email->pengirim->name }}</td>
+                    </tr>
+                </table>
             </div>
         </div>
     </div>
@@ -179,6 +196,7 @@
 // Character counter
 const isiPesan = document.getElementById('isi_pesan');
 const charCount = document.getElementById('char-count');
+
 isiPesan.addEventListener('input', function() {
     charCount.textContent = this.value.length;
 });
@@ -194,7 +212,6 @@ document.getElementById('leads-tab').addEventListener('click', function() {
 
 // Pelanggan Search
 const pelangganSearch = document.getElementById('pelanggan-search');
-const pelangganSearchResults = document.getElementById('pelanggan-search-results');
 const pelangganResultsList = document.getElementById('pelanggan-results-list');
 const pelangganNoResults = document.getElementById('pelanggan-no-results');
 const allPelanggan = @json($pelanggan);
@@ -210,7 +227,7 @@ pelangganSearch.addEventListener('input', function() {
 
     const filtered = allPelanggan.filter(p =>
         p.nama.toLowerCase().includes(query) ||
-        p.email.toLowerCase().includes(query)
+        (p.email && p.email.toLowerCase().includes(query))
     );
 
     if (filtered.length === 0) {
@@ -222,11 +239,12 @@ pelangganSearch.addEventListener('input', function() {
 
     pelangganNoResults.style.display = 'none';
     pelangganResultsList.innerHTML = filtered.map(p => `
-        <button type="button" class="list-group-item list-group-item-action pelanggan-item" data-id="${p.id}" data-email="${p.email}" data-nama="${p.nama}">
+        <button type="button" class="list-group-item list-group-item-action pelanggan-item"
+                data-id="${p.id}" data-email="${p.email || ''}" data-nama="${p.nama}">
             <div class="d-flex justify-content-between">
                 <div>
                     <h6 class="mb-1">${p.nama}</h6>
-                    <small class="text-muted">${p.email}</small>
+                    <small class="text-muted">${p.email || 'Tidak ada email'}</small>
                 </div>
                 <div class="text-end text-muted">
                     <small>${p.no_telepon}</small>
@@ -235,7 +253,7 @@ pelangganSearch.addEventListener('input', function() {
         </button>
     `).join('');
 
-    // Attach click handlers to new items
+    // Attach click handlers
     document.querySelectorAll('#pelanggan-results-list .pelanggan-item').forEach(item => {
         item.addEventListener('click', selectPelanggan);
     });
@@ -243,7 +261,6 @@ pelangganSearch.addEventListener('input', function() {
 
 // Leads Search
 const leadsSearch = document.getElementById('leads-search');
-const leadsSearchResults = document.getElementById('leads-search-results');
 const leadsResultsList = document.getElementById('leads-results-list');
 const leadsNoResults = document.getElementById('leads-no-results');
 const allLeads = @json($leads);
@@ -259,7 +276,7 @@ leadsSearch.addEventListener('input', function() {
 
     const filtered = allLeads.filter(l =>
         l.nama.toLowerCase().includes(query) ||
-        l.email.toLowerCase().includes(query)
+        (l.email && l.email.toLowerCase().includes(query))
     );
 
     if (filtered.length === 0) {
@@ -271,11 +288,12 @@ leadsSearch.addEventListener('input', function() {
 
     leadsNoResults.style.display = 'none';
     leadsResultsList.innerHTML = filtered.map(l => `
-        <button type="button" class="list-group-item list-group-item-action leads-item" data-id="${l.id}" data-email="${l.email}" data-nama="${l.nama}">
+        <button type="button" class="list-group-item list-group-item-action leads-item"
+                data-id="${l.id}" data-email="${l.email || ''}" data-nama="${l.nama}">
             <div class="d-flex justify-content-between">
                 <div>
                     <h6 class="mb-1">${l.nama}</h6>
-                    <small class="text-muted">${l.email}</small>
+                    <small class="text-muted">${l.email || 'Tidak ada email'}</small>
                 </div>
                 <div class="text-end text-muted">
                     <small>${l.no_telepon}</small>
@@ -284,7 +302,7 @@ leadsSearch.addEventListener('input', function() {
         </button>
     `).join('');
 
-    // Attach click handlers to new items
+    // Attach click handlers
     document.querySelectorAll('#leads-results-list .leads-item').forEach(item => {
         item.addEventListener('click', selectLeads);
     });
@@ -311,6 +329,9 @@ function selectPelanggan(e) {
     });
     this.classList.add('active');
     this.style.backgroundColor = '#e7f3ff';
+
+    // Clear leads selection
+    clearLeadsSelection();
 }
 
 // Select Leads
@@ -334,6 +355,9 @@ function selectLeads(e) {
     });
     this.classList.add('active');
     this.style.backgroundColor = '#e7f3ff';
+
+    // Clear pelanggan selection
+    clearPelangganSelection();
 }
 
 // Clear selections
@@ -355,13 +379,16 @@ function clearLeadsSelection() {
     });
 }
 
-// Attach click handlers
-document.querySelectorAll('.pelanggan-item').forEach(item => {
-    item.addEventListener('click', selectPelanggan);
-});
+// Initialize event listeners on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Attach click handlers for initial items
+    document.querySelectorAll('.pelanggan-item').forEach(item => {
+        item.addEventListener('click', selectPelanggan);
+    });
 
-document.querySelectorAll('.leads-item').forEach(item => {
-    item.addEventListener('click', selectLeads);
+    document.querySelectorAll('.leads-item').forEach(item => {
+        item.addEventListener('click', selectLeads);
+    });
 });
 
 // Form submission - validate at least one recipient
@@ -372,146 +399,10 @@ document.getElementById('emailForm').addEventListener('submit', function(e) {
     if (!pelangganId && !leadsId) {
         e.preventDefault();
         alert('Silakan pilih pelanggan atau leads!');
+        return false;
     }
 });
 </script>
 @endpush
-@endsection
 
-                    <div class="mb-3">
-                        <label for="subjek" class="form-label">
-                            Subjek Email <span class="text-danger">*</span>
-                        </label>
-                        <input type="text" class="form-control @error('subjek') is-invalid @enderror"
-                               id="subjek" name="subjek" value="{{ old('subjek', $email->subjek) }}"
-                               placeholder="Contoh: Penawaran Produk Terbaru" required>
-                        @error('subjek')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="isi_pesan" class="form-label">
-                            Isi Email <span class="text-danger">*</span>
-                        </label>
-                        <textarea class="form-control @error('isi_pesan') is-invalid @enderror"
-                                  id="isi_pesan" name="isi_pesan" rows="10"
-                                  placeholder="Tulis isi email di sini..." required>{{ old('isi_pesan', $email->isi_pesan) }}</textarea>
-                        @error('isi_pesan')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                        <small class="text-muted">Karakter: <span id="char-count">{{ strlen($email->isi_pesan) }}</span></small>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="waktu_kirim" class="form-label">
-                            Waktu Pencatatan <span class="text-danger">*</span>
-                        </label>
-                        <input type="datetime-local" class="form-control @error('waktu_kirim') is-invalid @enderror"
-                               id="waktu_kirim" name="waktu_kirim"
-                               value="{{ old('waktu_kirim', $email->waktu_kirim->format('Y-m-d\TH:i')) }}" required>
-                        @error('waktu_kirim')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">
-                            Tindakan <span class="text-danger">*</span>
-                        </label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="action" id="action-save"
-                                   value="save_only" {{ old('action', 'save_only') == 'save_only' ? 'checked' : '' }} required>
-                            <label class="form-check-label" for="action-save">
-                                <i class="bi bi-database"></i> <strong>Simpan Perubahan Saja</strong>
-                                <small class="d-block text-muted">Hanya update data, tidak mengirim email</small>
-                            </label>
-                        </div>
-                        <div class="form-check mt-2">
-                            <input class="form-check-input" type="radio" name="action" id="action-send"
-                                   value="send_email" {{ old('action') == 'send_email' ? 'checked' : '' }} required>
-                            <label class="form-check-label" for="action-send">
-                                <i class="bi bi-send"></i> <strong>Update & Kirim Email</strong>
-                                <small class="d-block text-muted">Update data dan langsung mengirim ke email pelanggan</small>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div id="email-info-alert" class="alert alert-info d-none" role="alert">
-                        <i class="bi bi-info-circle"></i>
-                        <strong>Info:</strong> Email akan dikirim ke <span id="customer-email-display" class="fw-bold">-</span>
-                    </div>
-
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-save"></i> Update & Lanjutkan
-                        </button>
-                        <a href="{{ route('emails.show', $email) }}" class="btn btn-secondary">
-                            <i class="bi bi-x-circle"></i> Batal
-                        </a>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="card bg-light">
-            <div class="card-body">
-                <h6 class="card-title"><i class="bi bi-info-circle"></i> Informasi</h6>
-                <p class="small mb-2">
-                    <strong>Dicatat:</strong> {{ $email->created_at->format('d M Y H:i') }}
-                </p>
-                <p class="small mb-2">
-                    <strong>Terakhir Update:</strong> {{ $email->updated_at->format('d M Y H:i') }}
-                </p>
-                <p class="small mb-0">
-                    <strong>Dikirim Oleh:</strong> {{ $email->pengirim->name }}
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-
-@push('scripts')
-<script>
-// Character counter
-const isiPesan = document.getElementById('isi_pesan');
-const charCount = document.getElementById('char-count');
-isiPesan.addEventListener('input', function() {
-    charCount.textContent = this.value.length;
-});
-
-// Dynamic email display when customer selected
-const pelangganSelect = document.getElementById('id_pelanggan');
-const emailDisplay = document.getElementById('customer-email-display');
-const emailAlert = document.getElementById('email-info-alert');
-const actionSend = document.getElementById('action-send');
-
-pelangganSelect.addEventListener('change', function() {
-    const selected = this.options[this.selectedIndex];
-    const email = selected.getAttribute('data-email');
-    const nama = selected.getAttribute('data-nama');
-
-    if (email) {
-        emailDisplay.textContent = email;
-        emailAlert.classList.remove('d-none');
-    } else {
-        emailAlert.classList.add('d-none');
-        actionSend.checked = false;
-        document.getElementById('action-save').checked = true;
-    }
-});
-
-// Initialize on page load
-if (pelangganSelect.value) {
-    const selected = pelangganSelect.options[pelangganSelect.selectedIndex];
-    const email = selected.getAttribute('data-email');
-    if (email) {
-        emailDisplay.textContent = email;
-        emailAlert.classList.remove('d-none');
-    }
-}
-</script>
-@endpush
 @endsection

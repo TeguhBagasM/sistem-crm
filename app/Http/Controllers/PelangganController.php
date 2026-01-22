@@ -78,7 +78,7 @@ class PelangganController extends Controller
                 ->update(['status_lead' => 'dikonversi']);
         }
 
-        return redirect()->route('pelanggan.show', $pelanggan)
+        return redirect()->route('pelanggan.index', $pelanggan)
             ->with('success', 'Pelanggan berhasil ditambahkan!');
     }
 
@@ -110,7 +110,7 @@ class PelangganController extends Controller
 
         $pelanggan->update($validated);
 
-        return redirect()->route('pelanggan.show', $pelanggan)
+        return redirect()->route('pelanggan.index', $pelanggan)
             ->with('success', 'Data pelanggan berhasil diperbarui!');
     }
 

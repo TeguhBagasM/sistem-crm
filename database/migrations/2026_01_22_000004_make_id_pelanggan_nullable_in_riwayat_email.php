@@ -9,15 +9,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('riwayat_email', function (Blueprint $table) {
-            $table->foreignId('id_calon_pelanggan')->nullable()->constrained('calon_pelanggan')->onDelete('cascade')->after('id_pelanggan');
+            $table->foreignId('id_pelanggan')->nullable()->change();
         });
     }
 
     public function down(): void
     {
         Schema::table('riwayat_email', function (Blueprint $table) {
-            $table->dropForeign(['id_calon_pelanggan']);
-            $table->dropColumn('id_calon_pelanggan');
+            $table->foreignId('id_pelanggan')->nullable(false)->change();
         });
     }
 };

@@ -158,8 +158,12 @@
                 <form action="{{ route('aktivitas.index') }}" method="GET" class="row g-3">
                     <div class="col-md-4">
                         <label for="jenis_aktivitas" class="form-label">Jenis Aktivitas</label>
-                        <input type="text" class="form-control" id="jenis_aktivitas" name="jenis_aktivitas"
-                               value="{{ request('jenis_aktivitas') }}" placeholder="Cari jenis aktivitas...">
+                        <select class="form-select" id="jenis_aktivitas" name="jenis_aktivitas">
+                            <option value="">Semua Jenis</option>
+                            <option value="email" {{ request('jenis_aktivitas') == 'email' ? 'selected' : '' }}>📧 Email</option>
+                            <option value="followup" {{ request('jenis_aktivitas') == 'followup' ? 'selected' : '' }}>📞 Follow-up</option>
+                            <option value="konten" {{ request('jenis_aktivitas') == 'konten' ? 'selected' : '' }}>📝 Konten</option>
+                        </select>
                     </div>
                     <div class="col-md-4">
                         <label for="status_aktivitas" class="form-label">Status</label>

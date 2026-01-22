@@ -122,19 +122,25 @@
                         <small class="text-muted">Waktu saat email ini akan/sudah dikirim</small>
                     </div>
 
+                    <!-- Aksi -->
                     <div class="mb-3">
                         <label class="form-label">
-                            <i class="bi bi-gear"></i> Aksi (pilih salah satu)<span class="text-danger">*</span>
+                            <i class="bi bi-gear"></i> Aksi <span class="text-danger">*</span>
                         </label>
-                        <div class="btn-group w-100" role="group">
-                            <input type="radio" class="btn-check" name="action" id="action-save" value="save_only" checked>
-                            <label class="btn btn-outline-primary" for="action-save">
-                                <i class="bi bi-save"></i> Simpan Sebagai draft
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="action" id="action-save"
+                                   value="save_only" {{ old('action', 'save_only') == 'save_only' ? 'checked' : '' }} required>
+                            <label class="form-check-label" for="action-save">
+                                <i class="bi bi-save"></i> <strong>Simpan Saja</strong>
+                                <small class="d-block text-muted">Hanya menyimpan data email sebagai draft</small>
                             </label>
-
-                            <input type="radio" class="btn-check" name="action" id="action-send" value="send_email">
-                            <label class="btn btn-outline-success" for="action-send">
-                                <i class="bi bi-send"></i> Kirim Sekarang
+                        </div>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="radio" name="action" id="action-send"
+                                   value="send_email" {{ old('action') == 'send_email' ? 'checked' : '' }} required>
+                            <label class="form-check-label" for="action-send">
+                                <i class="bi bi-send"></i> <strong>Kirim Sekarang</strong>
+                                <small class="d-block text-muted">Simpan dan langsung kirim email ke penerima</small>
                             </label>
                         </div>
                     </div>
@@ -156,11 +162,20 @@
         </div>
     </div>
 
+    <!-- Sidebar Info -->
     <div class="col-md-4">
-        <div class="card bg-light mb-3">
+        <div class="card bg-light">
             <div class="card-body">
                 <h6 class="card-title"><i class="bi bi-info-circle"></i> Informasi</h6>
-                <p class="small mb-0">Gunakan form di samping untuk mencatat riwayat email pelanggan atau leads Anda. Data tersimpan akan membantu dalam tracking komunikasi.</p>
+                <p class="small mb-2">
+                    <strong>Catat Email:</strong> Gunakan form ini untuk mencatat riwayat email ke pelanggan atau leads
+                </p>
+                <p class="small mb-2">
+                    <strong>Aksi:</strong> Pilih untuk menyimpan sebagai draft atau langsung mengirim
+                </p>
+                <p class="small mb-0">
+                    <strong>Catatan:</strong> Data email akan membantu dalam tracking komunikasi dengan pelanggan
+                </p>
             </div>
         </div>
     </div>
@@ -186,7 +201,6 @@ document.getElementById('leads-tab').addEventListener('click', function() {
 
 // Pelanggan Search
 const pelangganSearch = document.getElementById('pelanggan-search');
-const pelangganSearchResults = document.getElementById('pelanggan-search-results');
 const pelangganResultsList = document.getElementById('pelanggan-results-list');
 const pelangganNoResults = document.getElementById('pelanggan-no-results');
 const allPelanggan = @json($pelanggan);
@@ -202,7 +216,7 @@ pelangganSearch.addEventListener('input', function() {
 
     const filtered = allPelanggan.filter(p =>
         p.nama.toLowerCase().includes(query) ||
-        p.email.toLowerCase().includes(query)
+        (p.email && p.email.toLowerCase().includes(query))
     );
 
     if (filtered.length === 0) {
@@ -214,11 +228,12 @@ pelangganSearch.addEventListener('input', function() {
 
     pelangganNoResults.style.display = 'none';
     pelangganResultsList.innerHTML = filtered.map(p => `
-        <button type="button" class="list-group-item list-group-item-action pelanggan-item" data-id="${p.id}" data-email="${p.email}" data-nama="${p.nama}">
+        <button type="button" class="list-group-item list-group-item-action pelanggan-item"
+                data-id="${p.id}" data-email="${p.email || ''}" data-nama="${p.nama}">
             <div class="d-flex justify-content-between">
                 <div>
                     <h6 class="mb-1">${p.nama}</h6>
-                    <small class="text-muted">${p.email}</small>
+                    <small class="text-muted">${p.email || 'Tidak ada email'}</small>
                 </div>
                 <div class="text-end text-muted">
                     <small>${p.no_telepon}</small>
@@ -227,7 +242,7 @@ pelangganSearch.addEventListener('input', function() {
         </button>
     `).join('');
 
-    // Attach click handlers to new items
+    // Attach click handlers
     document.querySelectorAll('#pelanggan-results-list .pelanggan-item').forEach(item => {
         item.addEventListener('click', selectPelanggan);
     });
@@ -235,7 +250,6 @@ pelangganSearch.addEventListener('input', function() {
 
 // Leads Search
 const leadsSearch = document.getElementById('leads-search');
-const leadsSearchResults = document.getElementById('leads-search-results');
 const leadsResultsList = document.getElementById('leads-results-list');
 const leadsNoResults = document.getElementById('leads-no-results');
 const allLeads = @json($leads);
@@ -251,7 +265,7 @@ leadsSearch.addEventListener('input', function() {
 
     const filtered = allLeads.filter(l =>
         l.nama.toLowerCase().includes(query) ||
-        l.email.toLowerCase().includes(query)
+        (l.email && l.email.toLowerCase().includes(query))
     );
 
     if (filtered.length === 0) {
@@ -263,11 +277,12 @@ leadsSearch.addEventListener('input', function() {
 
     leadsNoResults.style.display = 'none';
     leadsResultsList.innerHTML = filtered.map(l => `
-        <button type="button" class="list-group-item list-group-item-action leads-item" data-id="${l.id}" data-email="${l.email}" data-nama="${l.nama}">
+        <button type="button" class="list-group-item list-group-item-action leads-item"
+                data-id="${l.id}" data-email="${l.email || ''}" data-nama="${l.nama}">
             <div class="d-flex justify-content-between">
                 <div>
                     <h6 class="mb-1">${l.nama}</h6>
-                    <small class="text-muted">${l.email}</small>
+                    <small class="text-muted">${l.email || 'Tidak ada email'}</small>
                 </div>
                 <div class="text-end text-muted">
                     <small>${l.no_telepon}</small>
@@ -276,7 +291,7 @@ leadsSearch.addEventListener('input', function() {
         </button>
     `).join('');
 
-    // Attach click handlers to new items
+    // Attach click handlers
     document.querySelectorAll('#leads-results-list .leads-item').forEach(item => {
         item.addEventListener('click', selectLeads);
     });
@@ -299,8 +314,13 @@ function selectPelanggan(e) {
     // Highlight selected
     document.querySelectorAll('.pelanggan-item').forEach(item => {
         item.classList.remove('active');
+        item.style.backgroundColor = '';
     });
     this.classList.add('active');
+    this.style.backgroundColor = '#e7f3ff';
+
+    // Clear leads selection
+    clearLeadsSelection();
 }
 
 // Select Leads
@@ -320,8 +340,13 @@ function selectLeads(e) {
     // Highlight selected
     document.querySelectorAll('.leads-item').forEach(item => {
         item.classList.remove('active');
+        item.style.backgroundColor = '';
     });
     this.classList.add('active');
+    this.style.backgroundColor = '#e7f3ff';
+
+    // Clear pelanggan selection
+    clearPelangganSelection();
 }
 
 // Clear selections
@@ -350,6 +375,18 @@ document.querySelectorAll('.leads-item').forEach(item => {
     item.addEventListener('click', selectLeads);
 });
 
+// Initialize event listeners on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Attach click handlers for initial items
+    document.querySelectorAll('.pelanggan-item').forEach(item => {
+        item.addEventListener('click', selectPelanggan);
+    });
+
+    document.querySelectorAll('.leads-item').forEach(item => {
+        item.addEventListener('click', selectLeads);
+    });
+});
+
 // Form submission - validate at least one recipient
 document.getElementById('emailForm').addEventListener('submit', function(e) {
     const pelangganId = document.getElementById('id_pelanggan').value;
@@ -358,6 +395,7 @@ document.getElementById('emailForm').addEventListener('submit', function(e) {
     if (!pelangganId && !leadsId) {
         e.preventDefault();
         alert('Silakan pilih pelanggan atau leads!');
+        return false;
     }
 });
 </script>

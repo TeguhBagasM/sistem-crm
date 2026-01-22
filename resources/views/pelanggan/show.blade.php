@@ -35,7 +35,8 @@
                 </div>
             </div>
             <div class="card-body">
-                <!-- Quick Action Buttons -->
+                <!-- Quick Action Buttons (Admin Only) -->
+                @if(Auth::user()->role === 'admin')
                 <div class="mb-4 d-flex gap-2 flex-wrap">
                     @if($pelanggan->no_telepon)
                     <a href="{{ $pelanggan->getWhatsAppLink() }}" target="_blank" class="btn btn-success btn-sm">
@@ -51,6 +52,7 @@
                     </a>
                     @endif
                 </div>
+                @endif
 
                 <!-- Customer Info -->
                 <div class="customer-info p-3 bg-light rounded mb-4">
@@ -273,15 +275,18 @@
                 <p class="small mb-2"><strong>{{ $pelanggan->calonPelanggan->nama }}</strong></p>
                 <p class="small mb-2">Sumber: <span class="badge bg-secondary">{{ $pelanggan->calonPelanggan->sumber }}</span></p>
                 <p class="small mb-2">Status: <span class="badge bg-success">{{ ucfirst(str_replace('_', ' ', $pelanggan->calonPelanggan->status_lead)) }}</span></p>
+                @if(Auth::user()->role === 'admin')
                 <hr>
                 <a href="{{ route('leads.show', $pelanggan->calonPelanggan) }}" class="btn btn-sm btn-primary w-100">
                     <i class="bi bi-eye"></i> Lihat Lead
                 </a>
+                @endif
             </div>
         </div>
         @endif
 
-        <!-- Quick Actions Card -->
+        <!-- Quick Actions Card (Admin Only) -->
+        @if(Auth::user()->role === 'admin')
         <div class="card bg-success text-white mb-3">
             <div class="card-body">
                 <h6 class="card-title"><i class="bi bi-lightning"></i> Aksi Cepat</h6>
@@ -293,6 +298,7 @@
                 </a>
             </div>
         </div>
+        @endif
 
         <!-- Statistics Card -->
         <div class="card">

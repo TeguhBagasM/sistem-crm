@@ -19,6 +19,7 @@
             <div class="card-header bg-primary text-white">
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="bi bi-calendar-check"></i> {{ $aktivitas->judul }}</h5>
+                    @if(Auth::user()->role === 'admin')
                     <div>
                         @if($aktivitas->status_aktivitas == 'direncanakan')
                         <form action="{{ route('aktivitas.update-status', $aktivitas) }}" method="POST" class="d-inline">
@@ -42,6 +43,7 @@
                             </button>
                         </form>
                     </div>
+                    @endif
                 </div>
             </div>
             <div class="card-body">
@@ -89,10 +91,7 @@
                             @if($aktivitas->pelanggan->perusahaan)
                             <p class="mb-2"><i class="bi bi-building"></i> {{ $aktivitas->pelanggan->perusahaan }}</p>
                             @endif
-                            <hr>
-                            <a href="{{ route('pelanggan.show', $aktivitas->pelanggan) }}" class="btn btn-sm btn-primary">
-                                <i class="bi bi-eye"></i> Lihat Detail
-                            </a>
+
                         </div>
                         @else
                         <div class="alert alert-secondary">

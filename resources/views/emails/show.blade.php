@@ -145,10 +145,12 @@
                 @if($email->pelanggan->perusahaan)
                 <p class="mb-0 small">🏢 {{ $email->pelanggan->perusahaan }}</p>
                 @endif
+                @if(Auth::user()->role === 'admin')
                 <hr class="bg-white">
                 <a href="{{ route('pelanggan.show', $email->pelanggan) }}" class="btn btn-sm btn-light w-100">
                     <i class="bi bi-eye"></i> Lihat Detail Pelanggan
                 </a>
+                @endif
             </div>
         </div>
     </div>
