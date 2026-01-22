@@ -19,18 +19,7 @@
             <div class="card-header bg-primary text-white">
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="bi bi-calendar-check"></i> {{ $aktivitas->judul }}</h5>
-                    @if(Auth::user()->role === 'admin')
                     <div>
-                        @if($aktivitas->status_aktivitas == 'direncanakan')
-                        <form action="{{ route('aktivitas.update-status', $aktivitas) }}" method="POST" class="d-inline">
-                            @csrf
-                            @method('PATCH')
-                            <input type="hidden" name="status_aktivitas" value="selesai">
-                            <button type="submit" class="btn btn-sm btn-success">
-                                <i class="bi bi-check-circle"></i> Tandai Selesai
-                            </button>
-                        </form>
-                        @endif
                         <a href="{{ route('aktivitas.edit', $aktivitas) }}" class="btn btn-sm btn-warning">
                             <i class="bi bi-pencil"></i> Edit
                         </a>
@@ -43,7 +32,6 @@
                             </button>
                         </form>
                     </div>
-                    @endif
                 </div>
             </div>
             <div class="card-body">

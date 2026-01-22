@@ -61,7 +61,7 @@ class RiwayatEmailController extends Controller
     public function create()
     {
         $pelanggan = Pelanggan::aktif()->latest()->get();
-        $leads = CalonPelanggan::latest()->get();
+        $leads = CalonPelanggan::where('status_lead', '!=', 'dikonversi')->latest()->get();
 
         return view('emails.create', compact('pelanggan', 'leads'));
     }
@@ -143,7 +143,7 @@ class RiwayatEmailController extends Controller
     public function edit(RiwayatEmail $email)
     {
         $pelanggan = Pelanggan::aktif()->latest()->get();
-        $leads = CalonPelanggan::latest()->get();
+        $leads = CalonPelanggan::where('status_lead', '!=', 'dikonversi')->latest()->get();
 
         return view('emails.edit', compact('email', 'pelanggan', 'leads'));
     }
