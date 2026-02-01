@@ -23,24 +23,7 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'role' => 'marketing1',
             ],
-            [
-                'name' => 'Ica',
-                'email' => 'marketing2@crm.com',
-                'password' => Hash::make('password'),
-                'role' => 'marketing2',
-            ],
-            [
-                'name' => 'Siska',
-                'email' => 'marketing3@crm.com',
-                'password' => Hash::make('password'),
-                'role' => 'marketing3',
-            ],
-            [
-                'name' => 'Asti',
-                'email' => 'marketing4@crm.com',
-                'password' => Hash::make('password'),
-                'role' => 'marketing4',
-            ],
+
         ];
 
         foreach ($users as $user) {

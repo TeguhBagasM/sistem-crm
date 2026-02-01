@@ -1,0 +1,192 @@
+@startuml CRM_Admin_Marketing_UseCase
+!theme plain
+skinparam actorStyle awesome
+skinparam backgroundColor #f0f0f0
+skinparam packageBackgroundColor #e1f5ff
+skinparam usecase {
+    BackgroundColor #fff3e0
+    BorderColor #ff6f00
+    ArrowColor #ff6f00
+}
+
+' ============================================================================
+' ACTORS
+' ============================================================================
+actor Admin as admin_actor
+actor Marketing as marketing_actor
+
+' ============================================================================
+' MAIN SYSTEM PACKAGE
+' ============================================================================
+package "CRM System" {
+
+    ' ========================================================================
+    ' ADMIN ROLE USE CASES
+    ' ========================================================================
+    package "Admin Management" {
+        usecase "Manage System" as UC_admin_main
+        usecase "Create User Account" as UC_admin_create_user
+        usecase "Edit User Profile" as UC_admin_edit_user
+        usecase "Delete User Account" as UC_admin_delete_user
+        usecase "Assign User Role" as UC_admin_assign_role
+        usecase "View System Logs" as UC_admin_view_logs
+        usecase "Configure System" as UC_admin_config
+
+        ' Include relationships - wajib dilakukan
+        UC_admin_main --> UC_admin_create_user : include
+        UC_admin_main --> UC_admin_edit_user : include
+        UC_admin_main --> UC_admin_delete_user : include
+        UC_admin_main --> UC_admin_assign_role : include
+
+        ' Extend relationships - opsional
+        UC_admin_main --|> UC_admin_view_logs : extend
+        UC_admin_main --|> UC_admin_config : extend
+    }
+
+    ' ========================================================================
+    ' SHARED USE CASES (UNTUK SEMUA ROLE)
+    ' ========================================================================
+    package "Dashboard & Reporting" {
+        usecase "View Dashboard" as UC_view_dashboard
+        usecase "Display Statistics" as UC_display_stats
+        usecase "Display Charts" as UC_display_charts
+        usecase "Filter Data" as UC_filter_data
+
+        ' Include relationships
+        UC_view_dashboard --> UC_display_stats : include
+        UC_view_dashboard --> UC_display_charts : include
+        UC_display_stats --> UC_filter_data : extend
+        UC_display_charts --> UC_filter_data : extend
+    }
+
+    ' ========================================================================
+    ' MARKETING ROLE USE CASES
+    ' ========================================================================
+    package "Lead & Contact Management" {
+        usecase "Manage Leads" as UC_manage_leads
+        usecase "Create New Lead" as UC_create_lead
+        usecase "View Lead Details" as UC_view_lead
+        usecase "Edit Lead Information" as UC_edit_lead
+        usecase "Delete Lead" as UC_delete_lead
+        usecase "Change Lead Status" as UC_change_lead_status
+        usecase "Convert Lead to Contact" as UC_convert_lead_contact
+
+        ' Include relationships - aktivitas utama
+        UC_manage_leads --> UC_create_lead : include
+        UC_manage_leads --> UC_view_lead : include
+        UC_manage_leads --> UC_edit_lead : include
+        UC_manage_leads --> UC_delete_lead : include
+
+        ' Extend relationships - aktivitas tambahan/opsional
+        UC_manage_leads --|> UC_change_lead_status : extend
+        UC_manage_leads --|> UC_convert_lead_contact : extend
+    }
+
+    package "Contact Management" {
+        usecase "Manage Contacts" as UC_manage_contacts
+        usecase "Create Contact" as UC_create_contact
+        usecase "View Contact" as UC_view_contact
+        usecase "Edit Contact" as UC_edit_contact
+        usecase "Delete Contact" as UC_delete_contact
+        usecase "Assign Tags to Contact" as UC_assign_tags
+        usecase "Segment Contacts" as UC_segment_contacts
+        usecase "Set Contact Priority" as UC_set_priority
+
+        ' Include relationships - fitur wajib
+        UC_manage_contacts --> UC_create_contact : include
+        UC_manage_contacts --> UC_view_contact : include
+        UC_manage_contacts --> UC_edit_contact : include
+        UC_manage_contacts --> UC_delete_contact : include
+
+        ' Extend relationships - fitur tambahan
+        UC_manage_contacts --|> UC_assign_tags : extend
+        UC_manage_contacts --|> UC_segment_contacts : extend
+        UC_manage_contacts --|> UC_set_priority : extend
+    }
+
+    package "Email Management" {
+        usecase "Manage Email Communication" as UC_manage_email
+        usecase "View Email List" as UC_view_email_list
+        usecase "Create Email Record" as UC_create_email
+        usecase "Send Email" as UC_send_email
+        usecase "Draft Email" as UC_draft_email
+        usecase "Edit Email" as UC_edit_email
+        usecase "Delete Email Record" as UC_delete_email
+        usecase "Validate Email Address" as UC_validate_email
+        usecase "Track Email Status" as UC_track_email
+
+        ' Include relationships
+        UC_manage_email --> UC_view_email_list : include
+        UC_manage_email --> UC_create_email : include
+        UC_manage_email --> UC_send_email : include
+        UC_manage_email --> UC_edit_email : include
+        UC_manage_email --> UC_delete_email : include
+
+        ' Extend relationships
+        UC_send_email --|> UC_validate_email : extend
+        UC_create_email --|> UC_draft_email : extend
+        UC_send_email --|> UC_track_email : extend
+    }
+
+    package "Activity Management" {
+        usecase "Manage Activities" as UC_manage_activities
+        usecase "Create Activity" as UC_create_activity
+        usecase "View Activity" as UC_view_activity
+        usecase "Edit Activity" as UC_edit_activity
+        usecase "Delete Activity" as UC_delete_activity
+        usecase "Change Activity Status" as UC_change_activity_status
+        usecase "View Calendar" as UC_view_calendar
+        usecase "Filter Activities by Date" as UC_filter_activities
+
+        ' Include relationships
+        UC_manage_activities --> UC_create_activity : include
+        UC_manage_activities --> UC_view_activity : include
+        UC_manage_activities --> UC_edit_activity : include
+        UC_manage_activities --> UC_delete_activity : include
+        UC_manage_activities --> UC_view_calendar : include
+
+        ' Extend relationships
+        UC_manage_activities --|> UC_change_activity_status : extend
+        UC_view_calendar --> UC_filter_activities : include
+    }
+
+}
+
+' ============================================================================
+' ACTOR-USECASE ASSOCIATIONS
+' ============================================================================
+
+' Admin Access
+admin_actor --> UC_admin_main : use
+admin_actor --> UC_view_dashboard : use
+
+' Marketing Access
+marketing_actor --> UC_manage_leads : use
+marketing_actor --> UC_manage_contacts : use
+marketing_actor --> UC_manage_email : use
+marketing_actor --> UC_manage_activities : use
+marketing_actor --> UC_view_dashboard : use
+
+note right of admin_actor
+  **Admin Role**
+  - Manage system users
+  - Full administrative access
+  - View system logs & config
+end note
+
+note right of marketing_actor
+  **Marketing Role**
+  - Manage leads & contacts
+  - Handle email communication
+  - Schedule activities
+  - View dashboard
+end note
+
+legend right
+  | Symbol | Meaning |
+  | --> | Include (komponen wajib) |
+  | --|> | Extend (fitur opsional) |
+  | | |
+end legend
+
+@enduml

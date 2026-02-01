@@ -1,0 +1,214 @@
+@startuml CRM_Database_ClassDiagram
+!theme plain
+skinparam linetype ortho
+skinparam classBackgroundColor #e1f5ff
+skinparam classBorderColor #01579b
+skinparam arrowColor #01579b
+skinparam noteBackgroundColor #fff3e0
+skinparam noteBorderColor #e65100
+
+' ============================================================================
+' User Model (dari default Laravel - diperluas)
+' ============================================================================
+class User {
+    {field} +id: Integer (PK)
+    {field} +name: String
+    {field} +email: String (Unique)
+    {field} +password: String
+    {field} +role: String (admin|marketing1-4)
+    {field} +created_at: Timestamp
+    {field} +updated_at: Timestamp
+    --
+    {method} +getCalonPelangganCreated(): Collection
+    {method} +getPelangganOwned(): Collection
+    {method} +getEmailSent(): Collection
+    {method} +getActivityCreated(): Collection
+}
+
+' ============================================================================
+' CalonPelanggan Model (Lead/Prospek)
+' ============================================================================
+class CalonPelanggan {
+    {field} +id: Integer (PK)
+    {field} +nama: String
+    {field} +email: String (Nullable)
+    {field} +no_telepon: String
+    {field} +sumber: String [IG|Website|WA]
+    {field} +alamat: String (Nullable)
+    {field} +status_lead: Enum (baru|dihubungi|qualified|dikonversi|gagal)
+    {field} +catatan: Text (Nullable)
+    {field} +dibuat_oleh: Integer (FK)
+    {field} +created_at: Timestamp
+    {field} +updated_at: Timestamp
+    --
+    {field} #table: String = 'calon_pelanggan'
+    {field} #fillable: Array
+    --
+    {method} +pembuatData(): BelongsTo
+    {method} +pelanggan(): HasOne
+    {method} +scopeBaru(): QueryBuilder
+    {method} +scopeDihubungi(): QueryBuilder
+    {method} +scopeQualified(): QueryBuilder
+    {method} +scopeDikonversi(): QueryBuilder
+    {method} +scopeGagal(): QueryBuilder
+    {method} -getStatusBadgeClass(): String
+}
+
+' ============================================================================
+' Pelanggan Model (Customer/Contact)
+' ============================================================================
+class Pelanggan {
+    {field} +id: Integer (PK)
+    {field} +id_calon_pelanggan: Integer (FK, Nullable)
+    {field} +nama: String
+    {field} +email: String (Nullable)
+    {field} +no_telepon: String
+    {field} +perusahaan: String (Nullable)
+    {field} +website: String (Nullable)
+    {field} +alamat: String (Nullable)
+    {field} +catatan_internal: Text (Nullable)
+    {field} +status_pelanggan: Enum (aktif|tidak_aktif)
+    {field} +kategori_pelanggan: String (Nullable)
+    {field} +rating_pelanggan: String (VIP|High|Medium|Low)
+    {field} +sumber_pelanggan: String (Nullable)
+    {field} +kontak_terakhir: Timestamp (Nullable)
+    {field} +pemilik_data: Integer (FK)
+    {field} +created_at: Timestamp
+    {field} +updated_at: Timestamp
+    --
+    {field} #table: String = 'pelanggan'
+    {field} #fillable: Array
+    {field} #casts: Array
+    --
+    {method} +calonPelanggan(): BelongsTo
+    {method} +pemilik(): BelongsTo
+    {method} +riwayatEmail(): HasMany
+    {method} +jadwalAktivitas(): HasMany
+    {method} +scopeAktif(): QueryBuilder
+    {method} +scopeTidakAktif(): QueryBuilder
+    {method} -getStatusBadgeClass(): String
+    {method} -getRatingBadgeClass(): String
+    {method} -getWhatsAppLink(): String
+    {method} -getCallLink(): String
+    {method} -getEmailLink(): String
+}
+
+' ============================================================================
+' RiwayatEmail Model (Email History)
+' ============================================================================
+class RiwayatEmail {
+    {field} +id: Integer (PK)
+    {field} +id_pelanggan: Integer (FK)
+    {field} +id_calon_pelanggan: Integer (FK, Nullable)
+    {field} +subjek: String
+    {field} +isi_pesan: Text
+    {field} +dikirim_oleh: Integer (FK)
+    {field} +waktu_kirim: Timestamp
+    {field} +status_kirim: Enum (draft|sent|failed)
+    {field} +waktu_terkirim: Timestamp (Nullable)
+    {field} +error_message: Text (Nullable)
+    {field} +created_at: Timestamp
+    {field} +updated_at: Timestamp
+    --
+    {field} #table: String = 'riwayat_email'
+    {field} #fillable: Array
+    {field} #casts: Array
+    --
+    {method} +pelanggan(): BelongsTo
+    {method} +calonPelanggan(): BelongsTo
+    {method} +pengirim(): BelongsTo
+    {method} -getStatusBadgeClass(): String
+    {method} -getStatusLabel(): String
+}
+
+' ============================================================================
+' JadwalAktivitas Model (Activity/Reminder)
+' ============================================================================
+class JadwalAktivitas {
+    {field} +id: Integer (PK)
+    {field} +judul: String
+    {field} +deskripsi: Text (Nullable)
+    {field} +jenis_aktivitas: Enum (email|followup|konten)
+    {field} +tanggal_jadwal: Date
+    {field} +status_aktivitas: Enum (direncanakan|selesai)
+    {field} +id_pelanggan: Integer (FK, Nullable)
+    {field} +dibuat_oleh: Integer (FK)
+    {field} +created_at: Timestamp
+    {field} +updated_at: Timestamp
+    --
+    {field} #table: String = 'jadwal_aktivitas'
+    {field} #fillable: Array
+    {field} #casts: Array
+    --
+    {method} +pelanggan(): BelongsTo
+    {method} +pembuat(): BelongsTo
+    {method} +scopeDirencanakan(): QueryBuilder
+    {method} +scopeSelesai(): QueryBuilder
+    {method} +scopeEmail(): QueryBuilder
+    {method} +scopeFollowup(): QueryBuilder
+    {method} +scopeKonten(): QueryBuilder
+    {method} -getStatusBadgeClass(): String
+    {method} -getJenisBadgeClass(): String
+}
+
+' ============================================================================
+' RELATIONSHIPS
+' ============================================================================
+
+User "1" --> "*" CalonPelanggan : dibuat_oleh
+User "1" --> "*" Pelanggan : pemilik_data
+User "1" --> "*" RiwayatEmail : dikirim_oleh
+User "1" --> "*" JadwalAktivitas : dibuat_oleh
+
+CalonPelanggan "1" --> "0..1" Pelanggan : convert_to
+CalonPelanggan "1" --> "*" RiwayatEmail : id_calon_pelanggan
+
+Pelanggan "1" --> "*" RiwayatEmail : id_pelanggan
+Pelanggan "1" --> "*" JadwalAktivitas : id_pelanggan
+
+' ============================================================================
+' NOTES & LEGEND
+' ============================================================================
+
+note right of CalonPelanggan
+    **Lead/Prospek Management**
+    Status progression:
+    baru → dihubungi → qualified
+    → dikonversi atau gagal
+
+    Sumber: IG, Website, WhatsApp
+end note
+
+note right of Pelanggan
+    **Customer Management**
+    Extended info untuk leads
+    yang sudah qualified dan
+    dikonversi menjadi customer
+end note
+
+note right of RiwayatEmail
+    **Email Communication History**
+    Tracks all email:
+    - Draft (belum dikirim)
+    - Sent (terkirim)
+    - Failed (gagal dikirim)
+end note
+
+note right of JadwalAktivitas
+    **Activity/Reminder Management**
+    Jenis aktivitas:
+    - email (email campaign)
+    - followup (follow-up call)
+    - konten (content creation)
+end note
+
+legend right
+    |<#e1f5ff> Notasi |
+    |<#fff3e0> (+) Public: dapat diakses dari luar class |
+    |<#fff3e0> (#) Protected: hanya dalam class & inheritance |
+    |<#fff3e0> (-) Private: hanya dalam class |
+    | FK | Foreign Key - Relationship |
+    | PK | Primary Key - Unique Identifier |
+end legend
+
+@enduml
